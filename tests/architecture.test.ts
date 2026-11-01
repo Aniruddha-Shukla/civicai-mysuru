@@ -20,7 +20,7 @@ function walk(dir: string): string[] {
 }
 
 const files = walk(SRC).map((path) => ({ path: relative(ROOT, path), text: readFileSync(path, "utf8") }));
-const SERVER_SECRETS = ["ANTHROPIC_API_KEY", "SUPABASE_SERVICE_ROLE_KEY", "CRON_SECRET", "DATABASE_URL", "DIRECT_URL", "RESEND_API_KEY"];
+const SERVER_SECRETS = ["GEMINI_API_KEY", "SUPABASE_SERVICE_ROLE_KEY", "CRON_SECRET", "DATABASE_URL", "DIRECT_URL", "RESEND_API_KEY"];
 
 describe("AI layer has no authority over schedules", () => {
   const aiFiles = files.filter((f) => f.path.startsWith("src/lib/ai/"));

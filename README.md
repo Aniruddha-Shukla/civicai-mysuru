@@ -161,7 +161,7 @@ A `CivicEvent` with **zero** `AlternativeArrangement` rows is how the schema rep
 | **Explicit uncertainty** | VERIFIED, UNVERIFIED and UNAVAILABLE are three first-class visual treatments with the §6.2 wording, never a hidden or null case. |
 | **Citizen control** | AI complaint drafts only fill the textarea. Submission is a separate, explicit `POST /api/complaints` by the citizen. |
 | **Auditability** | Every verify, mark-unavailable, withdraw, arrangement verify, firewall rejection, dispatch, sync run and complaint triage writes an `AuditLog` row. `/operator/audit-log` is read-only, and no API can edit or delete entries. |
-| **Degraded mode** | Without `ANTHROPIC_API_KEY`, or on any AI timeout, rate limit, refusal or malformed output, alerts, verification and complaints keep working unchanged. Only the AI enhancements fall back, with a calm "AI assistance is temporarily unavailable" notice. |
+| **Degraded mode** | Without `GEMINI_API_KEY`, or on any AI timeout, free-tier quota exhaustion (429), safety block or malformed output, alerts, verification and complaints keep working unchanged. Only the AI enhancements fall back, with a calm "AI assistance is temporarily unavailable" notice. |
 
 ---
 
@@ -175,7 +175,7 @@ A `CivicEvent` with **zero** `AlternativeArrangement` rows is how the schema rep
 | Auth / storage | Supabase Auth (email + password, roles `CITIZEN` / `OPERATOR`); Supabase Storage private bucket `complaint-photos` |
 | GIS | GeoJSON ward polygons + `@turf/turf` point-in-polygon in the app layer |
 | Maps | Mapbox GL JS, lazy-loaded, with a searchable list fallback |
-| AI | Anthropic Claude (`@anthropic-ai/sdk`), server-only, model from `ANTHROPIC_MODEL`, structured outputs validated by Zod |
+| AI | Google Gemini via `@google/genai` (free AI Studio key works), server-only, model from `GEMINI_MODEL`, JSON-schema structured output re-validated by Zod |
 | Validation | Zod everywhere (API + `react-hook-form` forms) |
 | Scheduling | Vercel Cron → `/api/cron/sync` (secret-protected) |
 | Tests / CI | Vitest + Testing Library; GitHub Actions: lint → typecheck → migrate → test (with Postgres) → build → secret scan |
@@ -192,8 +192,8 @@ A `CivicEvent` with **zero** `AlternativeArrangement` rows is how the schema rep
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ✅ | public | Supabase anon (publishable) key. |
 | `SUPABASE_SERVICE_ROLE_KEY` | ✅ | **server only** | Private photo storage and the demo seed (creates demo users). Never prefix it with `NEXT_PUBLIC_`. |
 | `CRON_SECRET` | ✅ | server | ≥ 16 random characters (`openssl rand -hex 32`). Vercel Cron sends it as `Authorization: Bearer …`; manual calls use `x-cron-secret`. |
-| `ANTHROPIC_API_KEY` | optional | **server only** | Enables the AI layer. Unset means template-only (degraded) mode. |
-| `ANTHROPIC_MODEL` | optional | server | Defaults to `claude-opus-5-5`. |
+| `GEMINI_API_KEY` | optional | **server only** | Enables the AI layer. A free key from [Google AI Studio](https://aistudio.google.com/apikey) works. Unset means template-only (degraded) mode. |
+| `GEMINI_MODEL` | optional | server | Defaults to `gemini-3.5-flash-lite` (stable Flash-Lite, the largest free-tier quota). Any Gemini text model ID works. |
 | `NEXT_PUBLIC_MAPBOX_TOKEN` | optional | public | Enables the map ward picker. Unset means a searchable list. |
 | `RESEND_API_KEY`, `RESEND_FROM_EMAIL` | optional | server | Optional email channel; in-app notifications never depend on it. |
 | `SEED_DEMO_DATA` | optional | build | `false` disables the demo seed on deploy. |
@@ -224,6 +224,8 @@ Supabase settings:
 Make an existing account an operator: `npx tsx scripts/promote-operator.ts someone@example.com`.
 
 Useful scripts: `npm run lint`, `npm run typecheck`, `npm run test`, `npm run build`, `npm run check:secrets`.
+
+**Gemini (optional).** Create a free key at [Google AI Studio](https://aistudio.google.com/apikey), put it in `.env` as `GEMINI_API_KEY`, then run `npm run ai:smoke`. It makes 2–3 small calls and shows that the model returns the required JSON shape, that a Kannada translation passes the hallucination firewall, and that an unanswerable question gets *"I don't have verified information about that yet."* Without a key, everything except the AI enhancements works unchanged.
 
 ---
 
@@ -288,7 +290,7 @@ Every mutating route validates its input with Zod, re-checks the session on the 
 - **Default expiry.** A notice stays current until the night before the next regular collection day, or until its verified alternative has happened. Display queries also filter by expiry, so an expired notice is never shown as current even before the cron archives it.
 - **Photo cap 4 MB.** Vercel serverless functions reject request bodies above 4.5 MB, so the spec's "e.g. 5 MB" is set just under the platform limit.
 - **DB-backed rate limiting** for AI and complaint endpoints. In-memory counters reset on every cold start.
-- **Structured outputs, not free text.** All Claude calls use `messages.parse` with a Zod schema. Refusal, truncation, timeout, rate-limit and parse failures all map to one `AiUnavailableError`, which leads to deterministic behaviour. Because every AI path already falls back deterministically, no server-side model fallback is configured. Any model can be selected via `ANTHROPIC_MODEL`.
+- **Gemini free tier, structured outputs.** All Gemini calls request JSON via `responseJsonSchema` (generated from the same Zod schema) with temperature 0, and the reply is re-validated with Zod. Safety blocks, truncation, timeouts, quota errors (429) and parse failures all map to one `AiUnavailableError`, which leads to deterministic behaviour. The SDK's default retry policy (up to 5 attempts, 60 s back-off) is replaced by a single quick retry on 5xx and none on 429, so an exhausted free quota degrades immediately instead of hanging a serverless function. Free-tier quotas are small and change without notice; the DB-backed per-user rate limits keep usage within them, and the app is fully functional without any key.
 - **Only the latest *verified* alternative is ever announced**, and the Q&A context never includes unverified alternatives. The dashboard shows them only with the explicit §6.2 *"A possible alternative may be …"* wording and an "Unverified" badge.
 
 ---
@@ -331,6 +333,7 @@ Every mutating route validates its input with Zod, re-checks the session on the 
 - **Routine targeting uses only `wardId`.** A map pin or "use my location" point is sent once to `/api/wards/resolve`, used to compute the ward, and neither stored nor logged.
 - **A precise location is collected only with a complaint**, only if the citizen opts in, and the citizen can delete it at any time from the complaint tracker (`DELETE /api/complaints/[id]/location`).
 - Complaint photos live in a **private** bucket and are viewed through 10-minute signed URLs.
+- **AI and data use.** On Google's free Gemini tier, prompts may be used by Google to improve its products. CivicAI only sends already-public notice text, the citizen's question, or their complaint notes — never names, emails, ward membership or locations. Use a paid-tier key for a real deployment.
 - Past notifications are immutable records of what was sent. Changing ward does not rewrite them.
 
 ---
@@ -365,7 +368,7 @@ These mirror the paper's §17.
 - **Ward-level targeting can be coarse.** A disruption affecting part of a ward reaches the whole ward. The arrangement's free-text `affectedArea` narrows the message but not the audience.
 - **Illustrative demo ward boundaries.** The four seeded wards are simple rectangles around central Mysuru, *not* official MCC ward shapefiles. A real deployment would import them from MCC or Survey of India. The cited city figures should also be re-verified.
 - **Uneven digital reach.** A smartphone/web channel excludes residents without devices, connectivity or literacy. **SMS, push notifications and IVR are out of scope** for this prototype (future work); email via Resend is optional.
-- AI features (Kannada translation, Q&A, drafting) depend on an external API and degrade to English templates without it. The operator console is English-only.
+- AI features (Kannada translation, Q&A, drafting) depend on Google's Gemini API, whose free-tier quota is small and can change without notice. Without it they degrade to English templates. The operator console is English-only.
 - Demo circular numbers ("MCC Circular No. 114/2026") and sources are fictitious.
 
 ---

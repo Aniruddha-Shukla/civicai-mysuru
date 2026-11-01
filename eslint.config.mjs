@@ -40,7 +40,7 @@ const config = [
         {
           paths: [
             { name: "@/lib/db", message: "Client components must not import the database client." },
-            { name: "@/lib/ai/client", message: "The Anthropic client is server-only." },
+            { name: "@/lib/ai/client", message: "The Gemini client is server-only." },
             { name: "@/lib/supabase/admin", message: "The service-role client is server-only." },
           ],
         },

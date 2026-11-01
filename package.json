@@ -2,7 +2,7 @@
   "name": "civicai-mysuru",
   "version": "1.0.0",
   "private": true,
-  "description": "CivicAI \u2014 a verified citizen communication layer for disrupted municipal waste-collection schedules (Mysuru City Corporation prototype).",
+  "description": "CivicAI — a verified citizen communication layer for disrupted municipal waste-collection schedules (Mysuru City Corporation prototype).",
   "engines": {
     "node": ">=20.9.0"
   },
@@ -19,10 +19,11 @@
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:seed": "prisma db seed",
-    "check:secrets": "tsx scripts/check-secrets.ts"
+    "check:secrets": "tsx scripts/check-secrets.ts",
+    "ai:smoke": "node --conditions=react-server --import tsx scripts/ai-smoke.ts"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^1.3.0",
+    "@google/genai": "^2.32.0",
     "@hookform/resolvers": "^7.0.1",
     "@prisma/client": "6.19.3",
     "@radix-ui/react-dialog": "^1.1.15",
@@ -34,6 +35,7 @@
     "@turf/turf": "^7.4.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "dotenv": "^17.2.0",
     "lucide-react": "^1.66.0",
     "mapbox-gl": "^3.34.1",
     "next": "15.5.28",
@@ -43,8 +45,7 @@
     "server-only": "^0.0.1",
     "sonner": "^2.0.8",
     "tailwind-merge": "^3.7.0",
-    "zod": "^4.1.0",
-    "dotenv": "^17.2.0"
+    "zod": "^4.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",

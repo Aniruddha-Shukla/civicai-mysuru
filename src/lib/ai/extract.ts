@@ -79,7 +79,6 @@ export async function extractAnnouncement(input: {
       user: `Today's date (IST): ${input.todayKey}\n<announcement>\n${text}\n</announcement>`,
       schema: ModelSchema,
       maxTokens: 4096,
-      effort: "medium",
     });
   } catch (error) {
     if (error instanceof AiUnavailableError) {

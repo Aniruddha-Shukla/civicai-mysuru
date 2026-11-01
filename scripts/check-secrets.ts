@@ -10,9 +10,9 @@ import { execSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 
-const SERVER_VARS = ["ANTHROPIC_API_KEY", "SUPABASE_SERVICE_ROLE_KEY", "CRON_SECRET", "DATABASE_URL", "DIRECT_URL", "RESEND_API_KEY"];
+const SERVER_VARS = ["GEMINI_API_KEY", "SUPABASE_SERVICE_ROLE_KEY", "CRON_SECRET", "DATABASE_URL", "DIRECT_URL", "RESEND_API_KEY"];
 const SECRET_PATTERNS: Array<[string, RegExp]> = [
-  ["Anthropic API key", /sk-ant-[A-Za-z0-9_-]{20,}/],
+  ["Google (Gemini) API key", /AIza[0-9A-Za-z_-]{35}/],
   ["Resend API key", /\bre_[A-Za-z0-9]{20,}\b/],
   ["Supabase secret key", /\bsb_secret_[A-Za-z0-9_-]{20,}/],
   ["Postgres URL with password", /postgres(?:ql)?:\/\/[^:\s"'/]+:[^@\s"']{6,}@(?!localhost|127\.0\.0\.1|HOST|host|aws-0-REGION|\[)/],
