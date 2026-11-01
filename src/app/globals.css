@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 160 20% 98%;
+    --foreground: 200 25% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 200 25% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 200 25% 12%;
+    --primary: 174 72% 26%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 168 25% 93%;
+    --secondary-foreground: 200 25% 15%;
+    --muted: 170 15% 94%;
+    --muted-foreground: 200 10% 38%;
+    --accent: 168 30% 91%;
+    --accent-foreground: 200 25% 15%;
+    --destructive: 0 72% 45%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 170 14% 86%;
+    --input: 170 14% 82%;
+    --ring: 174 72% 30%;
+    --radius: 0.75rem;
+
+    /* Verification states — three first-class visual treatments (paper §6.2) */
+    --verified: 152 68% 30%;
+    --verified-soft: 150 60% 95%;
+    --verified-foreground: 152 70% 20%;
+    --unverified: 35 92% 42%;
+    --unverified-soft: 45 100% 95%;
+    --unverified-foreground: 30 80% 25%;
+    --unavailable: 215 14% 42%;
+    --unavailable-soft: 214 25% 95%;
+    --unavailable-foreground: 215 25% 25%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    overflow-x: hidden;
+  }
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+}
