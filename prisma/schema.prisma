@@ -1,0 +1,214 @@
+// CivicAI domain model — mirrors §10 of the research paper.
+//
+// Additions beyond the paper's entity list are marked "ADDED" and exist only to
+// make a safety property enforceable at the database level (dedup, optimistic
+// concurrency, change detection), never to store AI-generated schedule data.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  // Pooled connection (Supabase pgbouncer, port 6543, ?pgbouncer=true) — used by the app at runtime.
+  url       = env("DATABASE_URL")
+  // Direct connection (port 5432) — used only by `prisma migrate`.
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  CITIZEN
+  OPERATOR
+}
+
+/// Exactly three states (§6.2 of the paper).
+enum VerificationStatus {
+  VERIFIED
+  UNVERIFIED
+  UNAVAILABLE
+}
+
+enum EventStatus {
+  ACTIVE
+  RESOLVED
+  EXPIRED
+  WITHDRAWN
+}
+
+enum CollectionFrequency {
+  DAILY
+  TWICE_WEEKLY
+  WEEKLY
+}
+
+model Profile {
+  id        String   @id // = Supabase auth user id
+  role      Role
+  name      String
+  email     String? // ADDED: optional email channel (Resend)
+  phone     String?
+  language  String   @default("en") // "en" | "kn"
+  wardId    String?
+  ward      Ward?    @relation(fields: [wardId], references: [id])
+  createdAt DateTime @default(now())
+
+  notifications Notification[]
+  complaints    Complaint[]
+  createdEvents CivicEvent[]   @relation("EventCreatedBy")
+
+  @@index([wardId, role])
+}
+
+model Ward {
+  id      String @id @default(cuid())
+  name    String @unique
+  zone    String
+  /// GeoJSON Polygon/MultiPolygon. Seeded values are ILLUSTRATIVE demo boundaries,
+  /// not official MCC ward shapefiles (see README → Limitations).
+  geojson Json
+
+  services    Service[]
+  profiles    Profile[]
+  civicEvents CivicEvent[]
+}
+
+model Service {
+  id             String              @id @default(cuid())
+  name           String // e.g. "Garbage Collection"
+  wardId         String
+  ward           Ward                @relation(fields: [wardId], references: [id])
+  frequency      CollectionFrequency
+  normalWeekdays Int[] // 0=Sun..6=Sat
+  normalTime     String // "07:00" (IST)
+
+  civicEvents CivicEvent[]
+  complaints  Complaint[]
+
+  @@unique([wardId, name])
+}
+
+model CivicEvent {
+  id                 String             @id @default(cuid())
+  serviceId          String
+  service            Service            @relation(fields: [serviceId], references: [id])
+  wardId             String
+  ward               Ward               @relation(fields: [wardId], references: [id])
+  eventType          String // holiday | breakdown | road_closure | weather | special_event | operational | emergency
+  affectedDate       DateTime // UTC instant of IST midnight of the affected day
+  reason             String
+  source             String // e.g. "MCC Circular No. 114/2026"
+  sourceUrl          String?
+  verificationStatus VerificationStatus @default(UNVERIFIED)
+  status             EventStatus        @default(ACTIVE)
+  expiryDate         DateTime?
+  createdById        String
+  createdBy          Profile            @relation("EventCreatedBy", fields: [createdById], references: [id])
+  verifiedById       String? // ADDED: operator who verified the notice
+  lastVerifiedAt     DateTime?
+  withdrawnAt        DateTime? // ADDED
+  withdrawalReason   String? // ADDED
+
+  /// ADDED: bumped on every change that must reach citizens (verify, arrangement
+  /// verified, withdrawal). The notification pass compares it to notifiedVersion.
+  version         Int @default(1)
+  /// Version that was last fully processed by the notification pass.
+  notifiedVersion Int @default(0)
+
+  /// ADDED: duplicate-ingestion guard — hash of (serviceId, IST affected day, wardId,
+  /// normalised source). Cleared on withdrawal so a corrected notice can be re-issued.
+  dedupKey String? @unique
+
+  arrangements  AlternativeArrangement[]
+  notifications Notification[]
+  complaints    Complaint[]
+  createdAt     DateTime                 @default(now())
+  updatedAt     DateTime                 @updatedAt
+
+  @@index([wardId, status, affectedDate])
+  @@index([status, verificationStatus])
+  @@index([status, expiryDate])
+}
+
+model AlternativeArrangement {
+  id                 String             @id @default(cuid())
+  eventId            String
+  event              CivicEvent         @relation(fields: [eventId], references: [id])
+  alternativeDate    DateTime // UTC instant of IST midnight of the alternative day
+  alternativeTime    String // "07:00" (IST)
+  affectedArea       String
+  source             String
+  verificationStatus VerificationStatus @default(UNVERIFIED)
+  verifiedById       String? // operator who approved it
+  lastVerifiedAt     DateTime? // ADDED: source-transparency requirement (§14)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt // ADDED: optimistic concurrency
+
+  @@index([eventId, verificationStatus])
+}
+
+model Notification {
+  id                 String     @id @default(cuid())
+  profileId          String
+  profile            Profile    @relation(fields: [profileId], references: [id])
+  eventId            String
+  event              CivicEvent @relation(fields: [eventId], references: [id])
+  templateKey        String // verified_alternative | no_alternative_published | retraction | update
+  /// Immutable snapshot of the deterministic (template-rendered) message.
+  message            String
+  /// Dedup guard: sha256(citizenId + eventId + message). UNIQUE so even two
+  /// concurrent cron invocations cannot insert the same alert twice.
+  contentHash        String     @unique
+  status             String     @default("sent") // sent | read
+  /// ADDED: optional AI translation that PASSED the hallucination firewall.
+  /// The deterministic `message` above always remains the source of truth.
+  translatedMessage  String?
+  translatedLanguage String?
+  emailedAt          DateTime? // ADDED
+  sentAt             DateTime   @default(now())
+
+  @@index([profileId, sentAt])
+  @@index([eventId, profileId])
+}
+
+model Complaint {
+  id           String      @id @default(cuid())
+  profileId    String
+  profile      Profile     @relation(fields: [profileId], references: [id])
+  serviceId    String
+  service      Service     @relation(fields: [serviceId], references: [id])
+  eventId      String? // ADDED: optional link to the disruption being reported on
+  event        CivicEvent? @relation(fields: [eventId], references: [id])
+  description  String
+  photoUrl     String? // storage object path in the private `complaint-photos` bucket
+  location     Json? // { lat, lng } — optional, deletable by the citizen
+  status       String      @default("open") // open | in_review | resolved | rejected
+  operatorNote String? // ADDED: shown to the citizen on the tracker
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt // ADDED
+
+  @@index([profileId, createdAt])
+  @@index([status, createdAt])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String?
+  action    String
+  entity    String
+  entityId  String
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([entity, entityId])
+}
+
+/// ADDED: DB-backed rate limiting for AI endpoints (in-memory counters do not
+/// survive across serverless instances).
+model RateLimitEvent {
+  id        String   @id @default(cuid())
+  key       String
+  createdAt DateTime @default(now())
+
+  @@index([key, createdAt])
+}
