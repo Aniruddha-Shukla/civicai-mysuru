@@ -10,11 +10,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { isAiConfigured } from "@/lib/ai/client";
 import { findConflictGroups, isCurrent } from "@/lib/conflicts";
 import { prisma } from "@/lib/db";
+import { requireOperatorPage } from "@/lib/operator-guard";
 import { formatIstDateShort, formatIstDateTime } from "@/lib/time";
 
 export const metadata: Metadata = { title: "Operator overview" };
 
 export default async function OperatorOverviewPage() {
+  await requireOperatorPage();
   const now = new Date();
   const [active, withdrawnPending, openComplaints, alerts24h, recentAudit] = await Promise.all([
     prisma.civicEvent.findMany({

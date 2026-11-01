@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { COMPLAINT_STATUSES } from "@/lib/constants";
 import { prisma } from "@/lib/db";
+import { requireOperatorPage } from "@/lib/operator-guard";
 import { formatIstDateShort, formatIstDateTime } from "@/lib/time";
 import { cn } from "@/lib/utils";
 
@@ -16,6 +17,7 @@ export const metadata: Metadata = { title: "Complaints" };
 const LABELS = { open: "Open", in_review: "In review", resolved: "Resolved", rejected: "Closed" } as const;
 
 export default async function OperatorComplaintsPage({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
+  await requireOperatorPage();
   const sp = await searchParams;
   const status = COMPLAINT_STATUSES.find((s) => s === sp.status);
   const [complaints, grouped] = await Promise.all([

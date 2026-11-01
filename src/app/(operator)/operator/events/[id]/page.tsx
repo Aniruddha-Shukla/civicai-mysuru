@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { isCurrent } from "@/lib/conflicts";
 import { prisma } from "@/lib/db";
+import { requireOperatorPage } from "@/lib/operator-guard";
 import { buildNotification } from "@/lib/notifications/engine";
 import { render, renderVerifiedAlternative } from "@/lib/notifications/templates";
 import { endOfIstDay, formatIstDate, formatIstDateTime, formatTime12h, istDateKey } from "@/lib/time";
@@ -20,6 +21,7 @@ import { deriveAlternativeStatus, selectVerifiedAlternative } from "@/lib/verifi
 export const metadata: Metadata = { title: "Notice" };
 
 export default async function OperatorEventPage({ params }: { params: Promise<{ id: string }> }) {
+  await requireOperatorPage();
   const { id } = await params;
   const event = await prisma.civicEvent.findUnique({
     where: { id },

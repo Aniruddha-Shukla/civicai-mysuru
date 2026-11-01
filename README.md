@@ -308,7 +308,7 @@ Every mutating route validates its input with Zod, re-checks the session on the 
 | Malformed or partial AI JSON | `extract.ts` returns `could_not_parse`; `tests/lib/extract-and-image.test.ts` |
 | AI output with an unsupported date, time or place | `guard.ts`; `tests/lib/guard.test.ts` |
 | AI key missing, rate-limited or timing out | `client.ts` raises `AiUnavailableError`, and every caller falls back deterministically |
-| CITIZEN calls an OPERATOR route → 403 | `rbac.ts`; `tests/rbac.test.ts` (calls the real route handlers; the DB is a tripwire proving the role check comes first) |
+| CITIZEN calls an OPERATOR route → 403 | `rbac.ts`; `tests/rbac.test.ts` (calls the real route handlers; the DB is a tripwire proving the role check comes first). Operator *pages* are also guarded twice: in the layout, and by `requireOperatorPage()` in every page, because layouts don't re-run on client-side navigation |
 | Secrets never in the client | `server-only` imports, ESLint rules, `tests/architecture.test.ts`, `scripts/check-secrets.ts` in CI |
 | Cron without the secret → 401 | `src/lib/cron-auth.ts` (constant-time compare, fails closed); `tests/rbac.test.ts` |
 | Parameterised SQL only | Prisma throughout; the architecture test forbids `$queryRawUnsafe` / `$executeRawUnsafe` |

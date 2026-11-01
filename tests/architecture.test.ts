@@ -94,3 +94,11 @@ describe("serverless runtime", () => {
     for (const r of routes) expect(r.text, r.path).toMatch(/export const runtime = "nodejs";/);
   });
 });
+
+describe("operator pages", () => {
+  it("every operator page re-checks the OPERATOR role next to its data access", () => {
+    const pages = files.filter((f) => f.path.startsWith("src/app/(operator)/") && f.path.endsWith("page.tsx"));
+    expect(pages.length).toBe(6);
+    for (const page of pages) expect(page.text, page.path).toMatch(/await requireOperatorPage\(\);/);
+  });
+});

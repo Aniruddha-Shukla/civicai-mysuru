@@ -9,6 +9,7 @@ import { VerificationBadge } from "@/components/verification-badge";
 import { Button } from "@/components/ui/button";
 import { NativeSelect } from "@/components/ui/select";
 import { prisma } from "@/lib/db";
+import { requireOperatorPage } from "@/lib/operator-guard";
 import { formatIstDateShort } from "@/lib/time";
 import { deriveAlternativeStatus } from "@/lib/verification";
 
@@ -23,6 +24,7 @@ export default async function OperatorEventsPage({
 }: {
   searchParams: Promise<{ status?: string; verification?: string; ward?: string; page?: string }>;
 }) {
+  await requireOperatorPage();
   const sp = await searchParams;
   const status = STATUSES.find((s) => s === sp.status);
   const verification = VERIFICATIONS.find((v) => v === sp.verification);

@@ -5,6 +5,7 @@ import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { prisma } from "@/lib/db";
+import { requireOperatorPage } from "@/lib/operator-guard";
 import { formatIstDateTime } from "@/lib/time";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +24,7 @@ const FILTERS = [
 
 /** Read-only by design: there is no API to edit or delete audit entries. */
 export default async function AuditLogPage({ searchParams }: { searchParams: Promise<{ filter?: string; page?: string }> }) {
+  await requireOperatorPage();
   const sp = await searchParams;
   const filter = FILTERS.find((f) => f.key === sp.filter)?.key ?? "";
   const page = Math.max(1, Number.parseInt(sp.page ?? "1", 10) || 1);
