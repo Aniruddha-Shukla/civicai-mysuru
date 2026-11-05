@@ -137,5 +137,10 @@ async function main() {
 
 main().catch((error: unknown) => {
   console.error(error);
+  if (fromBuild) {
+    // Demo data is optional: a seed problem must never stop the real app from deploying.
+    console.warn("Demo seed failed — continuing the deployment without refreshed demo data.");
+    return;
+  }
   process.exit(1);
 });

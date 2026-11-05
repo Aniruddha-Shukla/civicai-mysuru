@@ -114,3 +114,26 @@ describe("credential forms", () => {
     }
   });
 });
+
+describe("deployment safety", () => {
+  it("every table created by a migration has row-level security enabled (Supabase Data API exposure)", () => {
+    const dir = join(ROOT, "prisma", "migrations");
+    const sql = readdirSync(dir)
+      .filter((name) => statSync(join(dir, name)).isDirectory())
+      .sort()
+      .map((name) => readFileSync(join(dir, name, "migration.sql"), "utf8"))
+      .join("\n");
+    const tables = [...sql.matchAll(/CREATE TABLE "(\w+)"/g)].map((m) => m[1]!);
+    expect(tables.length).toBeGreaterThan(8);
+    for (const table of tables) expect(sql, table).toContain(`ALTER TABLE "${table}" ENABLE ROW LEVEL SECURITY`);
+  });
+
+  it("vercel.json cron runs at most once a day, or the deployment fails on Vercel's Hobby plan", () => {
+    const config = JSON.parse(readFileSync(join(ROOT, "vercel.json"), "utf8")) as { crons: { schedule: string }[] };
+    for (const { schedule } of config.crons) {
+      const [minute, hour] = schedule.split(" ");
+      expect(minute, schedule).toMatch(/^\d+$/);
+      expect(hour, schedule).toMatch(/^\d+$/);
+    }
+  });
+});

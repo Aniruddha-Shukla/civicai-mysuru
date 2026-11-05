@@ -1,0 +1,21 @@
+# Keeps the paper's every-6-hours sync on the free tier. Vercel's Hobby plan allows cron only once
+# a day (vercel.json), so this free workflow calls the same secret-protected endpoint in between.
+# Optional: it does nothing until the APP_URL variable and CRON_SECRET secret are set (see DEPLOY.md).
+name: Scheduled sync
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+
+jobs:
+  sync:
+    if: ${{ vars.APP_URL != '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Call /api/cron/sync
+        env:
+          APP_URL: ${{ vars.APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: curl --fail-with-body --silent --show-error --max-time 70 -X POST "$APP_URL/api/cron/sync" -H "x-cron-secret: $CRON_SECRET"

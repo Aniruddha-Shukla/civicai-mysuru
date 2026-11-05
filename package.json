@@ -2,9 +2,9 @@
   "name": "civicai-mysuru",
   "version": "1.0.0",
   "private": true,
-  "description": "CivicAI — a verified citizen communication layer for disrupted municipal waste-collection schedules (Mysuru City Corporation prototype).",
+  "description": "CivicAI \u2014 a verified citizen communication layer for disrupted municipal waste-collection schedules (Mysuru City Corporation prototype).",
   "engines": {
-    "node": ">=20.9.0"
+    "node": "22.x"
   },
   "scripts": {
     "dev": "next dev",
@@ -20,7 +20,8 @@
     "db:deploy": "prisma migrate deploy",
     "db:seed": "prisma db seed",
     "check:secrets": "tsx scripts/check-secrets.ts",
-    "ai:smoke": "node --conditions=react-server --import tsx scripts/ai-smoke.ts"
+    "ai:smoke": "node --conditions=react-server --import tsx scripts/ai-smoke.ts",
+    "check:deploy": "tsx scripts/check-deploy.ts"
   },
   "dependencies": {
     "@google/genai": "^2.32.0",
