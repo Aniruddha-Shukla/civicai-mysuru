@@ -97,7 +97,7 @@ export function EventForm({ wards, aiAvailable, todayKey }: { wards: WardOption[
   const existingId = (serverError?.details as { existingEventId?: string } | undefined)?.existingEventId;
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1fr,380px]">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr),380px]">
       <Card>
         <CardHeader>
           <CardTitle>Disruption notice</CardTitle>

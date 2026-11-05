@@ -109,7 +109,7 @@ export default async function OperatorEventPage({ params }: { params: Promise<{ 
         </Alert>
       ) : null}
 
-      <div className="grid gap-5 lg:grid-cols-[1fr,360px]">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr),360px]">
         <div className="space-y-5">
           <div>
             <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Citizen view</p>
