@@ -18,7 +18,7 @@ The principle is enforced by code. The checks are listed in [How the principle i
 - [Tech stack](#tech-stack)
 - [Environment variables](#environment-variables)
 - [Local setup](#local-setup)
-- [Deploying to Vercel](#deploying-to-vercel)
+- [Deploying to Vercel](#deploying-to-vercel) (step-by-step in [DEPLOY.md](DEPLOY.md))
 - [API reference](#api-reference)
 - [Design decisions](#design-decisions)
 - [Edge-case checklist → implementation](#edge-case-checklist--implementation)
@@ -111,7 +111,7 @@ The paper's FastAPI and Next.js pair becomes one Next.js app. Its Route Handlers
        ┌────────────────────────────────────────────────▼───────────────────────────────┐
        │ 4. CITIZEN NOTIFICATION LAYER  src/lib/notifications/*                          │
        │    buildNotification() (§12) → deterministic templates (§5/§6.2)                │
-       │    immediate pass on verify/withdraw + Vercel Cron /api/cron/sync every 6 h     │
+       │    immediate pass on verify/withdraw + scheduled sync via /api/cron/sync        │
        │    ward targeting via turf.js · dedup by UNIQUE contentHash · in-app + email    │
        └──────────────┬────────────────────────────────────────────────┬────────────────┘
                       │ rendered English text only                      │ Notification rows
@@ -156,6 +156,7 @@ A `CivicEvent` with **zero** `AlternativeArrangement` rows is how the schema rep
 | **Deterministic messages** | `render()` builds alerts only from fields of the verified records (`templates.ts`). The LLM may only translate or rephrase an already-rendered string. |
 | **Hallucination firewall** | `src/lib/ai/guard.ts` `validateAgainstSource()` extracts every date, time, day name, relative-day word ("tomorrow"), bare number and known place name from the AI output, in English or Kannada and in any normal form ("7 AM" = "07:00" = "ಬೆಳಿಗ್ಗೆ 7:00"). Each token must appear in the source fields the model was given; translation also requires every source token to survive. On failure the AI text is discarded, the deterministic text is shown, and an `ai.guard_rejected` AuditLog row is written. `tests/lib/guard.test.ts` feeds deliberately tampered responses (8:00 instead of 7:00, Thursday instead of Wednesday, AM↔PM flips, invented dates and "tomorrow") and asserts rejection plus fallback. |
 | **Grounded Q&A** | The model receives only the citizen's ward's **verified** rows (unverified alternatives are excluded). It must return `answerable`, `answer` and `cited_record_ids` as structured output. In code: not answerable → the exact sentence *"I don't have verified information about that yet."*; no valid citation → the same sentence; firewall failure → deterministic summary. |
+| **No side door to the data** | Row-level security on every table blocks Supabase's public Data API, so the only way to write a schedule is through the role-checked API routes. Checked by `tests/architecture.test.ts` and against real Postgres in `tests/integration/sync.db.test.ts`. |
 | **Source transparency** | `EventCardProps` makes `source`, `verificationStatus` and `lastVerifiedAt` **required** keys, so a card cannot render without them. `null` renders as "Not yet verified". |
 | **Human oversight** | `/api/ai/extract` returns a **draft** only. Dates or times the model computed that aren't written in the text are dropped with a warning; malformed output goes to "Could not parse — fill in manually". |
 | **Explicit uncertainty** | VERIFIED, UNVERIFIED and UNAVAILABLE are three first-class visual treatments with the §6.2 wording, never a hidden or null case. |
@@ -171,13 +172,13 @@ A `CivicEvent` with **zero** `AlternativeArrangement` rows is how the schema rep
 |---|---|
 | Framework | Next.js 15 (App Router, TypeScript, `src/`). Route Handlers form the API/orchestration layer. |
 | UI | Tailwind CSS, shadcn/ui components (Radix primitives), lucide-react, sonner |
-| Database | Supabase Postgres, through Prisma 6 (pooled `DATABASE_URL` + direct `DIRECT_URL`) |
+| Database | Supabase Postgres, through Prisma 6 (Transaction pooler `DATABASE_URL` + Session pooler `DIRECT_URL`) |
 | Auth / storage | Supabase Auth (email + password, roles `CITIZEN` / `OPERATOR`); Supabase Storage private bucket `complaint-photos` |
 | GIS | GeoJSON ward polygons + `@turf/turf` point-in-polygon in the app layer |
 | Maps | Mapbox GL JS, lazy-loaded, with a searchable list fallback |
 | AI | Google Gemini via `@google/genai` (free AI Studio key works), server-only, model from `GEMINI_MODEL`, JSON-schema structured output re-validated by Zod |
 | Validation | Zod everywhere (API + `react-hook-form` forms) |
-| Scheduling | Vercel Cron → `/api/cron/sync` (secret-protected) |
+| Scheduling | Vercel Cron → `/api/cron/sync` (secret-protected), daily on the Hobby plan; an optional GitHub workflow keeps it every 6 hours |
 | Tests / CI | Vitest + Testing Library; GitHub Actions: lint → typecheck → migrate → test (with Postgres) → build → secret scan |
 
 ---
@@ -186,11 +187,11 @@ A `CivicEvent` with **zero** `AlternativeArrangement` rows is how the schema rep
 
 | Variable | Required | Scope | Description |
 |---|---|---|---|
-| `DATABASE_URL` | ✅ | server | Supabase **pooled** connection string (port **6543**, `?pgbouncer=true&connection_limit=1`), used by the app at runtime. |
-| `DIRECT_URL` | ✅ | server | Supabase **direct** connection (port **5432**), used by `prisma migrate`. |
+| `DATABASE_URL` | ✅ | server | Supabase **Transaction pooler** string (port **6543**, `?pgbouncer=true&connection_limit=1`), used by the app at runtime. |
+| `DIRECT_URL` | ✅ | server | Supabase **Session pooler** string (port **5432**), used by `prisma migrate`. Not the "Direct connection" host: it is IPv6-only and Vercel cannot reach it. |
 | `NEXT_PUBLIC_SUPABASE_URL` | ✅ | public | Supabase project URL. |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ✅ | public | Supabase anon (publishable) key. |
-| `SUPABASE_SERVICE_ROLE_KEY` | ✅ | **server only** | Private photo storage and the demo seed (creates demo users). Never prefix it with `NEXT_PUBLIC_`. |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ✅ | public | Supabase publishable key (`sb_publishable_…`) or legacy anon key. |
+| `SUPABASE_SERVICE_ROLE_KEY` | ✅ | **server only** | Supabase secret key (`sb_secret_…`) or legacy service_role key, for private photo storage and the demo seed. Never prefix it with `NEXT_PUBLIC_`. |
 | `CRON_SECRET` | ✅ | server | ≥ 16 random characters (`openssl rand -hex 32`). Vercel Cron sends it as `Authorization: Bearer …`; manual calls use `x-cron-secret`. |
 | `GEMINI_API_KEY` | optional | **server only** | Enables the AI layer. A free key from [Google AI Studio](https://aistudio.google.com/apikey) works. Unset means template-only (degraded) mode. |
 | `GEMINI_MODEL` | optional | server | Defaults to `gemini-3.5-flash-lite` (stable Flash-Lite, the largest free-tier quota). Any Gemini text model ID works. |
@@ -223,7 +224,7 @@ Supabase settings:
 
 Make an existing account an operator: `npx tsx scripts/promote-operator.ts someone@example.com`.
 
-Useful scripts: `npm run lint`, `npm run typecheck`, `npm run test`, `npm run build`, `npm run check:secrets`.
+Useful scripts: `npm run lint`, `npm run typecheck`, `npm run test`, `npm run build`, `npm run check:secrets`, `npm run check:deploy`.
 
 **Gemini (optional).** Create a free key at [Google AI Studio](https://aistudio.google.com/apikey), put it in `.env` as `GEMINI_API_KEY`, then run `npm run ai:smoke`. It makes 2–3 small calls and shows that the model returns the required JSON shape, that a Kannada translation passes the hallucination firewall, and that an unanswerable question gets *"I don't have verified information about that yet."* Without a key, everything except the AI enhancements works unchanged.
 
@@ -231,16 +232,17 @@ Useful scripts: `npm run lint`, `npm run typecheck`, `npm run test`, `npm run bu
 
 ## Deploying to Vercel
 
-1. Push the repository to GitHub and import it in Vercel (framework preset: Next.js).
-2. Set every **required** variable from the table above in *Project → Settings → Environment Variables*, plus any optional ones.
-3. Deploy. `vercel.json` sets the build command to `npm run vercel-build`, which runs
-   `prisma generate` → `prisma migrate deploy` → idempotent demo seed → `next build`.
-   Prisma Client is also generated in `postinstall`, which prevents the classic "works locally, breaks on Vercel" failure. No manual post-deploy step is needed.
-4. `vercel.json` registers the cron `0 */6 * * *` → `/api/cron/sync`. Vercel authenticates it with `CRON_SECRET` automatically.
+**Follow [DEPLOY.md](DEPLOY.md)** for the step-by-step guide (about 15 minutes). In short:
+
+1. Create a Supabase project in the Mumbai region and turn off **Confirm email**.
+2. Copy `.env.example` to `.env.vercel`, fill it in, and run `npm run check:deploy`, which tests your settings against the real project.
+3. Import the repo in Vercel, paste `.env.vercel` into the environment variables, and deploy.
+
+`vercel.json` sets the build command to `npm run vercel-build`, which runs `prisma generate` → `prisma migrate deploy` → idempotent demo seed → `next build`. Prisma Client is also generated in `postinstall`, which prevents the classic "works locally, breaks on Vercel" failure. A failed migration stops the build; a failed demo seed only logs a warning, because demo data must never block the real app.
 
 Post-deploy verification:
 
-- [ ] `GET /api/health` → `database: true`, `auth: true`, `cron: true`
+- [ ] `GET /api/health` → `database: true`, `auth: true`, `storage: true`, `cron: true`
 - [ ] Sign up and sign in work; onboarding shows the map with `NEXT_PUBLIC_MAPBOX_TOKEN` and the list without it
 - [ ] Demo citizen sees Scenario A and B with the exact paper wording
 - [ ] `/api/cron/sync` returns 401 without the secret header and 200 with it; a second run creates 0 notifications
@@ -281,11 +283,12 @@ Every mutating route validates its input with Zod, re-checks the session on the 
 ## Design decisions
 
 - **turf.js instead of PostGIS.** The paper specifies PostGIS. Prisma does not model PostGIS geometry types natively, so every spatial query would need raw SQL. PostGIS on serverless Postgres with migrations is also a common source of deployment breakage. Ward-level targeting needs only point-in-polygon at onboarding, plus a boundary-distance check for about 65 polygons, which `@turf/turf` does in milliseconds in the app layer with zero extra infrastructure. The same GeoJSON could move to PostGIS later without changing `geo.ts`'s callers. This is a deliberate trade, not a shortcut.
-- **Vercel Cron instead of APScheduler.** APScheduler needs a long-lived Python process, which serverless does not provide. The paper's 5-step job (§13) is kept as one **idempotent, bounded** invocation: a 500-row budget, a 100-event budget and a 45-second deadline. Unfinished work is resumed by the next run because `notifiedVersion` only advances when an event is fully processed. Verify and withdraw also trigger an **immediate** pass, so the cron is a safety net rather than the latency floor.
+- **Vercel Cron instead of APScheduler.** APScheduler needs a long-lived Python process, which serverless does not provide. Vercel's Hobby plan rejects cron more frequent than once a day, so `vercel.json` runs daily and the optional `.github/workflows/scheduled-sync.yml` calls the same endpoint every 6 hours, as the paper specifies. The paper's 5-step job (§13) is kept as one **idempotent, bounded** invocation: a 500-row budget, a 100-event budget and a 45-second deadline. Unfinished work is resumed by the next run because `notifiedVersion` only advances when an event is fully processed. Verify and withdraw also trigger an **immediate** pass, so the cron is a safety net rather than the latency floor.
 - **One Next.js app instead of FastAPI + Next.js.** Same layer responsibilities, one deployable unit, one type system end to end.
 - **Change detection: `version` and `notifiedVersion`.** Every change that must reach citizens (verify, arrangement verified, withdrawal) bumps `version`. The pass compares the two values, decides per citizen against their *latest* message (so an unchanged event is never re-sent), and inserts with `UNIQUE(contentHash)` + `skipDuplicates`. Even two overlapping cron runs cannot double-send.
 - **Verified records are locked.** Corrections go through withdraw (a retraction is sent) plus a new notice. Silent edits of something citizens were told are impossible.
 - **Optimistic concurrency.** Every operator write carries `expectedUpdatedAt` and uses `updateMany(where: {id, updatedAt})`. A stale write returns **409 "This record changed, please refresh"** instead of overwriting.
+- **Row-level security with no policies.** Supabase publishes the `public` schema through its Data API, so without RLS anyone with the public key could read and write every table directly, bypassing all role checks. A migration enables RLS on every table with no policies and revokes the `anon` / `authenticated` grants. The app connects through Prisma as the table owner, which RLS does not restrict, so the Data API has no access while the app works normally. Tests assert every table is covered.
 - **Duplicates vs conflicts.** A *duplicate* is the same service, IST day, ward and normalised source; it is blocked by a UNIQUE `dedupKey`, which is released on withdrawal. A *conflict* is a different notice for the same ward, service and day; it is never auto-merged, it is flagged on the operator overview, and citizens see and are notified about only the most recently verified one.
 - **Default expiry.** A notice stays current until the night before the next regular collection day, or until its verified alternative has happened. Display queries also filter by expiry, so an expired notice is never shown as current even before the cron archives it.
 - **Photo cap 4 MB.** Vercel serverless functions reject request bodies above 4.5 MB, so the spec's "e.g. 5 MB" is set just under the platform limit.
@@ -323,7 +326,7 @@ Every mutating route validates its input with Zod, re-checks the session on the 
 | UTC storage, IST display and day logic | `src/lib/time.ts` (fixed +05:30, server-timezone independent); `tests/lib/time.test.ts` |
 | Mobile (≈360 px) | Mobile-first layouts, bottom tab bar, native selects |
 | Missing Mapbox token | The map is not loaded and the searchable list is used; map errors also fall back to the list |
-| Prisma connection exhaustion | Pooled `DATABASE_URL` (6543, `pgbouncer=true`) + `DIRECT_URL` for migrations |
+| Prisma connection exhaustion | Transaction pooler `DATABASE_URL` (6543, `pgbouncer=true`) + Session pooler `DIRECT_URL` for migrations; `npm run check:deploy` validates both |
 | Prisma on Edge | Every API route sets `runtime = "nodejs"` (checked by a test); middleware never imports Prisma |
 
 ---
@@ -353,7 +356,8 @@ TEST_DATABASE_URL=postgresql://… npm run test   # also runs the PostgreSQL int
 | `tests/lib/geo.test.ts` | Inside, outside, near-boundary, exactly-on-boundary and corner cases |
 | `tests/cron/sync.test.ts` | Running sync twice creates no duplicates, plus follow-ups, retractions, expiry, lookahead, row budget and conflicts |
 | `tests/integration/sync.db.test.ts` | The same guarantees against real PostgreSQL with the seeded scenarios, including the DB rejecting a duplicate `contentHash` |
-| `tests/architecture.test.ts` | No AI authority, no secrets in client code, Node.js runtime on every API route, no raw HTML or unsafe SQL |
+| `tests/architecture.test.ts` | No AI authority, no secrets in client code, Node.js runtime on every API route, no raw HTML or unsafe SQL, RLS on every table, Hobby-safe cron |
+| `tests/deploy-env.test.ts` | The deploy checker catches the IPv6-only host, swapped ports, leftover placeholders and a secret key in a public variable |
 | others | i18n fallback, verification state machine, IST boundaries, extraction parsing, photo sniffing, EventCard states |
 
 GitHub Actions (`.github/workflows/ci.yml`) runs on every push and pull request: **lint → typecheck → migrate (Postgres service) → test → build → secret scan**.
