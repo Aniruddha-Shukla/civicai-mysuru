@@ -18,4 +18,5 @@ jobs:
         env:
           APP_URL: ${{ vars.APP_URL }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
-        run: curl --fail-with-body --silent --show-error --max-time 70 -X POST "$APP_URL/api/cron/sync" -H "x-cron-secret: $CRON_SECRET"
+        run: |
+          curl --fail-with-body --silent --show-error --max-time 70 -X POST "$APP_URL/api/cron/sync" -H "x-cron-secret: $CRON_SECRET"
