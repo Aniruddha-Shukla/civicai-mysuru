@@ -65,6 +65,12 @@ describe.skipIf(!url)("sync against PostgreSQL", () => {
     expect(await db.notification.count()).toBe(afterFirst);
   });
 
+  it("row-level security is on for every table (Supabase Data API exposure)", async () => {
+    const open = await db.$queryRaw<{ tablename: string }[]>`
+      SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND NOT rowsecurity`;
+    expect(open).toEqual([]);
+  });
+
   it("the database itself rejects a duplicate contentHash", async () => {
     const existing = await db.notification.findFirstOrThrow();
     const { id: _id, sentAt: _sentAt, ...copy } = existing;
