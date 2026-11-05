@@ -26,6 +26,8 @@ function SignInForm({ next }: { next?: string }) {
 
   return (
     <form
+      // POST so that a submit without JavaScript can never put the password in the URL or server logs.
+      method="post"
       noValidate
       className="space-y-4"
       onSubmit={form.handleSubmit((values) =>
@@ -77,6 +79,8 @@ function SignUpForm() {
 
   return (
     <form
+      // POST so that a submit without JavaScript can never put the password in the URL or server logs.
+      method="post"
       noValidate
       className="space-y-4"
       onSubmit={form.handleSubmit((values) =>

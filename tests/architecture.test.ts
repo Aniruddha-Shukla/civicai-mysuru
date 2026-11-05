@@ -102,3 +102,15 @@ describe("operator pages", () => {
     for (const page of pages) expect(page.text, page.path).toMatch(/await requireOperatorPage\(\);/);
   });
 });
+
+describe("credential forms", () => {
+  it("every form with a password field uses POST, so credentials can never land in a URL", () => {
+    const source = files.find((f) => f.path === "src/components/auth-card.tsx")!.text;
+    const forms = source.split("<form").slice(1);
+    expect(forms.length).toBe(2);
+    for (const form of forms) {
+      expect(form).toContain('type="password"');
+      expect(form.slice(0, form.indexOf("onSubmit"))).toContain('method="post"');
+    }
+  });
+});
