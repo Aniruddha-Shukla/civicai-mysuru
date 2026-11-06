@@ -1,21 +1,29 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { LoaderCircle, MailCheck, ShieldCheck, User } from "lucide-react";
+import { Lock, LoaderCircle, Mail, MailCheck, ShieldCheck, User, UserRound } from "lucide-react";
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { useI18n } from "@/components/i18n-provider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { demoSignInAction, signInAction, signUpAction } from "@/app/login/actions";
 import { LoginSchema, SignupSchema } from "@/lib/validation/schemas";
 
 function FieldError({ message }: { message?: string }) {
   return message ? <p className="text-xs text-destructive">{message}</p> : null;
+}
+
+/** A field with a picture next to it (envelope for email, lock for password) so it is recognisable at a glance. */
+function IconField({ icon: Icon, children }: { icon: typeof Mail; children: React.ReactNode }) {
+  return (
+    <div className="relative">
+      <Icon className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-primary/70" aria-hidden />
+      {children}
+    </div>
+  );
 }
 
 function SignInForm({ next }: { next?: string }) {
@@ -40,12 +48,16 @@ function SignInForm({ next }: { next?: string }) {
     >
       <div className="space-y-1.5">
         <Label htmlFor="signin-email">{t("auth.email")}</Label>
-        <Input id="signin-email" type="email" autoComplete="email" {...form.register("email")} />
+        <IconField icon={Mail}>
+          <Input id="signin-email" type="email" autoComplete="email" placeholder="name@example.com" className="pl-12" {...form.register("email")} />
+        </IconField>
         <FieldError message={form.formState.errors.email?.message} />
       </div>
       <div className="space-y-1.5">
         <Label htmlFor="signin-password">{t("auth.password")}</Label>
-        <Input id="signin-password" type="password" autoComplete="current-password" {...form.register("password")} />
+        <IconField icon={Lock}>
+          <Input id="signin-password" type="password" autoComplete="current-password" className="pl-12" {...form.register("password")} />
+        </IconField>
         <FieldError message={form.formState.errors.password?.message} />
       </div>
       {error ? (
@@ -53,7 +65,7 @@ function SignInForm({ next }: { next?: string }) {
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       ) : null}
-      <Button type="submit" className="w-full" disabled={pending}>
+      <Button type="submit" size="lg" className="w-full" disabled={pending}>
         {pending ? <LoaderCircle className="animate-spin" aria-hidden /> : null}
         {t("auth.signInCta")}
       </Button>
@@ -94,17 +106,23 @@ function SignUpForm() {
     >
       <div className="space-y-1.5">
         <Label htmlFor="signup-name">{t("auth.name")}</Label>
-        <Input id="signup-name" autoComplete="name" {...form.register("name")} />
+        <IconField icon={UserRound}>
+          <Input id="signup-name" autoComplete="name" className="pl-12" {...form.register("name")} />
+        </IconField>
         <FieldError message={form.formState.errors.name?.message} />
       </div>
       <div className="space-y-1.5">
         <Label htmlFor="signup-email">{t("auth.email")}</Label>
-        <Input id="signup-email" type="email" autoComplete="email" {...form.register("email")} />
+        <IconField icon={Mail}>
+          <Input id="signup-email" type="email" autoComplete="email" placeholder="name@example.com" className="pl-12" {...form.register("email")} />
+        </IconField>
         <FieldError message={form.formState.errors.email?.message} />
       </div>
       <div className="space-y-1.5">
         <Label htmlFor="signup-password">{t("auth.password")}</Label>
-        <Input id="signup-password" type="password" autoComplete="new-password" {...form.register("password")} />
+        <IconField icon={Lock}>
+          <Input id="signup-password" type="password" autoComplete="new-password" className="pl-12" {...form.register("password")} />
+        </IconField>
         <FieldError message={form.formState.errors.password?.message} />
       </div>
       {error ? (
@@ -112,7 +130,7 @@ function SignUpForm() {
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       ) : null}
-      <Button type="submit" className="w-full" disabled={pending}>
+      <Button type="submit" size="lg" className="w-full" disabled={pending}>
         {pending ? <LoaderCircle className="animate-spin" aria-hidden /> : null}
         {t("auth.signUpCta")}
       </Button>
@@ -142,11 +160,23 @@ export function DemoSignIn({ hero = false }: { hero?: boolean }) {
     return (
       <div className="space-y-2">
         <div className="grid gap-3 sm:grid-cols-2">
-          <Button type="button" size="lg" className="h-14 rounded-2xl text-base" disabled={pending !== null} onClick={() => signIn("citizen")}>
+          <Button
+            type="button"
+            size="lg"
+            className="h-14 rounded-2xl bg-white text-base text-primary shadow-lg shadow-black/10 hover:bg-violet-50"
+            disabled={pending !== null}
+            onClick={() => signIn("citizen")}
+          >
             {pending === "citizen" ? <LoaderCircle className="animate-spin" aria-hidden /> : <User aria-hidden />}
             {t("landing.tryCitizen")}
           </Button>
-          <Button type="button" size="lg" variant="outline" className="h-14 rounded-2xl bg-card text-base" disabled={pending !== null} onClick={() => signIn("operator")}>
+          <Button
+            type="button"
+            size="lg"
+            className="h-14 rounded-2xl border border-white/40 bg-white/10 text-base text-white shadow-none backdrop-blur hover:bg-white/20"
+            disabled={pending !== null}
+            onClick={() => signIn("operator")}
+          >
             {pending === "operator" ? <LoaderCircle className="animate-spin" aria-hidden /> : <ShieldCheck aria-hidden />}
             {t("landing.tryOperator")}
           </Button>
@@ -161,16 +191,21 @@ export function DemoSignIn({ hero = false }: { hero?: boolean }) {
   }
 
   return (
-    <div className="mt-5 space-y-2 border-t pt-4">
-      <p className="text-center text-xs font-medium uppercase tracking-wide text-muted-foreground">{t("auth.demoHeading")}</p>
+    <div className="space-y-3">
+      <div className="flex items-center gap-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        <span className="h-px flex-1 bg-border" />
+        {t("auth.or")}
+        <span className="h-px flex-1 bg-border" />
+      </div>
+      <p className="text-center text-sm font-semibold">{t("auth.quickTry")}</p>
       <div className="grid gap-2 sm:grid-cols-2">
-        <Button type="button" variant="outline" disabled={pending !== null} onClick={() => signIn("operator")}>
-          {pending === "operator" ? <LoaderCircle className="animate-spin" aria-hidden /> : <ShieldCheck aria-hidden />}
-          {t("auth.demoOperator")}
-        </Button>
-        <Button type="button" variant="outline" disabled={pending !== null} onClick={() => signIn("citizen")}>
+        <Button type="button" variant="secondary" size="lg" className="h-12 text-sm" disabled={pending !== null} onClick={() => signIn("citizen")}>
           {pending === "citizen" ? <LoaderCircle className="animate-spin" aria-hidden /> : <User aria-hidden />}
           {t("auth.demoCitizen")}
+        </Button>
+        <Button type="button" variant="secondary" size="lg" className="h-12 text-sm" disabled={pending !== null} onClick={() => signIn("operator")}>
+          {pending === "operator" ? <LoaderCircle className="animate-spin" aria-hidden /> : <ShieldCheck aria-hidden />}
+          {t("auth.demoOperator")}
         </Button>
       </div>
       {error ? (
@@ -194,33 +229,30 @@ export function AuthCard({
   demoLogin?: boolean;
 }) {
   const { t } = useI18n();
+  // One simple form at a time (like a paper form), with a plain link to switch — no tabs to understand.
+  const [mode, setMode] = useState<"signin" | "signup">(defaultTab);
+  const signin = mode === "signin";
+
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader>
-        <CardTitle className="text-xl">{t("app.name")}</CardTitle>
-        <CardDescription>{t("app.tagline")}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        {!configured ? (
-          <Alert variant="warning" className="mb-4">
-            <AlertDescription>{t("auth.notConfigured")}</AlertDescription>
-          </Alert>
-        ) : null}
-        <Tabs defaultValue={defaultTab}>
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="signin">{t("auth.signIn")}</TabsTrigger>
-            <TabsTrigger value="signup">{t("auth.signUp")}</TabsTrigger>
-          </TabsList>
-          <TabsContent value="signin">
-            <SignInForm next={next} />
-            {demoLogin ? <DemoSignIn /> : null}
-          </TabsContent>
-          <TabsContent value="signup">
-            <SignUpForm />
-          </TabsContent>
-        </Tabs>
-        {demoLogin ? null : <p className="mt-4 text-center text-xs text-muted-foreground">{t("auth.demoAccounts")}</p>}
-      </CardContent>
-    </Card>
+    <div className="w-full space-y-6">
+      <h2 className="text-lg font-semibold text-muted-foreground">{signin ? t("auth.welcomeTitle") : t("auth.createTitle")}</h2>
+      {!configured ? (
+        <Alert variant="warning">
+          <AlertDescription>{t("auth.notConfigured")}</AlertDescription>
+        </Alert>
+      ) : null}
+
+      {signin ? <SignInForm next={next} /> : <SignUpForm />}
+
+      <p className="text-center text-sm text-muted-foreground">
+        {signin ? t("auth.newHere") : t("auth.haveAccount")}{" "}
+        <button type="button" className="font-semibold text-primary underline-offset-4 hover:underline" onClick={() => setMode(signin ? "signup" : "signin")}>
+          {signin ? t("auth.signUp") : t("auth.signIn")}
+        </button>
+      </p>
+
+      {signin && demoLogin ? <DemoSignIn /> : null}
+      {demoLogin ? null : <p className="text-center text-xs text-muted-foreground">{t("auth.demoAccounts")}</p>}
+    </div>
   );
 }

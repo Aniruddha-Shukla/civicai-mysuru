@@ -32,12 +32,12 @@ export default async function OperatorLayout({ children }: { children: React.Rea
   }
 
   return (
-    <div className="min-h-dvh bg-muted/30">
-      <header className="sticky top-0 z-30 border-b bg-card/95 backdrop-blur">
-        <div className="container flex h-14 items-center justify-between gap-2">
+    <div className="min-h-dvh">
+      <header className="sticky top-0 z-30 border-b border-primary/10 bg-card/90 backdrop-blur-md">
+        <div className="container flex h-16 items-center justify-between gap-2">
           <Brand href="/operator" subtitle="Operator console" />
           <div className="flex items-center gap-2">
-            <span className="hidden text-xs text-muted-foreground sm:inline">{profile.name}</span>
+            <span className="hidden rounded-full bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground sm:inline">{profile.name}</span>
             <SignOutButton label="Sign out" />
           </div>
         </div>

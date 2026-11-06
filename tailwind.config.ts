@@ -27,6 +27,16 @@ const config: Config = {
         unverified: { DEFAULT: "hsl(var(--unverified))", soft: "hsl(var(--unverified-soft))", foreground: "hsl(var(--unverified-foreground))" },
         unavailable: { DEFAULT: "hsl(var(--unavailable))", soft: "hsl(var(--unavailable-soft))", foreground: "hsl(var(--unavailable-foreground))" },
       },
+      keyframes: {
+        drive: { from: { transform: "translateX(-34px)" }, to: { transform: "translateX(34px)" } },
+        twinkle: { "0%, 100%": { opacity: "1" }, "50%": { opacity: "0.25" } },
+        float: { "0%, 100%": { transform: "translateY(0)" }, "50%": { transform: "translateY(-6px)" } },
+      },
+      animation: {
+        drive: "drive 7s ease-in-out infinite alternate",
+        twinkle: "twinkle 3s ease-in-out infinite",
+        float: "float 6s ease-in-out infinite",
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",

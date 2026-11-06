@@ -6,11 +6,11 @@ import { formatTime12h } from "@/lib/time";
 import { cn } from "@/lib/utils";
 
 const STYLE = {
-  normal: { card: "from-emerald-600 to-teal-700", Icon: CalendarCheck },
-  replacement: { card: "from-sky-600 to-teal-700", Icon: RefreshCw },
-  moved: { card: "from-amber-500 to-orange-600", Icon: CalendarClock },
-  maybe: { card: "from-amber-500 to-amber-700", Icon: CircleQuestionMark },
-  cancelled: { card: "from-rose-600 to-red-700", Icon: CalendarX },
+  normal: { card: "bg-hero", Icon: CalendarCheck },
+  replacement: { card: "bg-hero", Icon: RefreshCw },
+  moved: { card: "bg-gradient-to-br from-amber-500 to-orange-600", Icon: CalendarClock },
+  maybe: { card: "bg-gradient-to-br from-amber-500 to-amber-700", Icon: CircleQuestionMark },
+  cancelled: { card: "bg-gradient-to-br from-rose-600 to-red-700", Icon: CalendarX },
 } as const;
 
 /** The one-glance answer to "when is my next pickup?" — big, coloured, plain words. */
@@ -18,7 +18,7 @@ export function NextPickup({ day, lang }: { day: PickupDay | null; lang: Lang })
   const t = getT(lang);
   if (!day) {
     return (
-      <div className="rounded-3xl bg-gradient-to-br from-slate-600 to-slate-800 p-5 text-white shadow-lg">
+      <div className="bg-hero rounded-3xl p-5 text-white shadow-lg shadow-primary/30">
         <p className="text-sm font-medium opacity-90">{t("home.nextPickup")}</p>
         <p className="mt-2 text-xl font-bold">{t("home.nothingScheduled")}</p>
       </div>
@@ -37,7 +37,7 @@ export function NextPickup({ day, lang }: { day: PickupDay | null; lang: Lang })
   return (
     <section
       aria-label={t("home.nextPickup")}
-      className={cn("relative overflow-hidden rounded-3xl bg-gradient-to-br p-5 text-white shadow-lg sm:p-6", style.card)}
+      className={cn("relative overflow-hidden rounded-3xl p-5 text-white shadow-xl shadow-primary/25 sm:p-6", style.card)}
     >
       <div className="pointer-events-none absolute -right-8 -top-8 size-40 rounded-full bg-white/10" aria-hidden />
       <div className="relative flex items-center justify-between gap-3">

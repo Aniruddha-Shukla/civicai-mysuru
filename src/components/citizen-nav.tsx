@@ -27,8 +27,8 @@ export function CitizenNav({ unread, variant }: { unread: number; variant: "top"
               href={item.href}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "relative flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent",
-                active ? "bg-secondary text-primary" : "text-muted-foreground",
+                "relative flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-colors",
+                active ? "bg-primary text-primary-foreground shadow-md shadow-primary/25" : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
               )}
             >
               <item.icon className="size-4" aria-hidden />
@@ -42,7 +42,7 @@ export function CitizenNav({ unread, variant }: { unread: number; variant: "top"
   }
 
   return (
-    <nav aria-label="Main" className="fixed inset-x-0 bottom-0 z-40 border-t bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden">
+    <nav aria-label="Main" className="fixed inset-x-0 bottom-0 z-40 border-t border-primary/10 bg-card/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_-12px_hsl(252_62%_40%/0.25)] backdrop-blur-md md:hidden">
       <ul className="grid grid-cols-4">
         {items.map((item) => {
           const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -51,12 +51,14 @@ export function CitizenNav({ unread, variant }: { unread: number; variant: "top"
               <Link
                 href={item.href}
                 aria-current={active ? "page" : undefined}
-                className={cn("relative flex flex-col items-center gap-0.5 py-2 text-[11px] font-medium", active ? "text-primary" : "text-muted-foreground")}
+                className={cn("relative flex flex-col items-center gap-1 py-2 text-xs font-semibold", active ? "text-primary" : "text-muted-foreground")}
               >
-                <item.icon className="size-5" aria-hidden />
+                <span className={cn("flex h-8 w-14 items-center justify-center rounded-full transition-colors", active && "bg-primary text-primary-foreground shadow-md shadow-primary/30")}>
+                  <item.icon className="size-5" aria-hidden />
+                </span>
                 {item.label}
                 {item.badge ? (
-                  <span className="absolute right-[calc(50%-1.25rem)] top-1 min-w-4 rounded-full bg-destructive px-1 text-center text-[10px] font-semibold leading-4 text-white">
+                  <span className="absolute right-[calc(50%-1.75rem)] top-1 min-w-4 rounded-full bg-destructive px-1 text-center text-[10px] font-semibold leading-4 text-white">
                     {item.badge}
                   </span>
                 ) : null}

@@ -2,6 +2,7 @@ import { ArrowRight, BellRing, CalendarCheck, CircleSlash, ShieldCheck } from "l
 import Link from "next/link";
 import { DemoSignIn } from "@/components/auth-card";
 import { Brand } from "@/components/brand";
+import { CityScene } from "@/components/city-scene";
 import { LanguageToggle } from "@/components/language-toggle";
 import { Button } from "@/components/ui/button";
 import { getSessionProfile } from "@/lib/auth";
@@ -20,63 +21,70 @@ export default async function LandingPage() {
   const showDemo = !profile && isSupabaseConfigured() && demoEnabled();
 
   const steps = [
-    { icon: ShieldCheck, tone: "bg-emerald-100 text-emerald-700", title: t("landing.step1Title"), body: t("landing.step1Body") },
-    { icon: BellRing, tone: "bg-sky-100 text-sky-700", title: t("landing.step2Title"), body: t("landing.step2Body") },
-    { icon: CalendarCheck, tone: "bg-amber-100 text-amber-700", title: t("landing.step3Title"), body: t("landing.step3Body") },
+    { icon: ShieldCheck, tone: "bg-violet-100 text-violet-700", title: t("landing.step1Title"), body: t("landing.step1Body") },
+    { icon: BellRing, tone: "bg-indigo-100 text-indigo-700", title: t("landing.step2Title"), body: t("landing.step2Body") },
+    { icon: CalendarCheck, tone: "bg-fuchsia-100 text-fuchsia-700", title: t("landing.step3Title"), body: t("landing.step3Body") },
   ];
 
   return (
-    <div className="min-h-dvh bg-gradient-to-b from-secondary via-background to-background">
-      <header className="container flex h-16 items-center justify-between gap-2">
-        <Brand />
-        <div className="flex items-center gap-1">
-          <LanguageToggle signedIn={Boolean(profile)} />
-          {home ? null : (
-            <Button asChild variant="outline" size="sm">
-              <Link href="/login">{t("auth.signIn")}</Link>
-            </Button>
-          )}
-        </div>
-      </header>
-
-      <main className="container max-w-3xl pb-16">
-        <section className="py-8 text-center sm:py-14">
-          <h1 className="text-3xl font-extrabold tracking-tight sm:text-5xl">{t("landing.headline")}</h1>
-          <p className="mx-auto mt-4 max-w-xl text-base text-muted-foreground sm:text-lg">{t("landing.body")}</p>
-
-          <div className="mx-auto mt-8 max-w-xl">
-            {home ? (
-              <Button asChild size="lg" className="h-14 rounded-2xl px-8 text-base">
-                <Link href={home}>
-                  {t("landing.getStarted")} <ArrowRight aria-hidden />
-                </Link>
-              </Button>
-            ) : showDemo ? (
-              <div className="space-y-3">
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("landing.tryIt")}</p>
-                <DemoSignIn hero />
-                <Link href="/login?mode=signup" className="inline-block pt-1 text-sm font-medium text-primary underline-offset-4 hover:underline">
-                  {t("auth.signUpCta")} →
-                </Link>
-              </div>
-            ) : (
-              <Button asChild size="lg" className="h-14 rounded-2xl px-8 text-base">
-                <Link href="/login?mode=signup">
-                  {t("landing.getStarted")} <ArrowRight aria-hidden />
-                </Link>
+    <div className="min-h-dvh">
+      <div className="bg-hero relative overflow-hidden rounded-b-[2.5rem] text-white shadow-xl shadow-primary/20">
+        <header className="container flex h-16 items-center justify-between gap-2">
+          <Brand light />
+          <div className="flex items-center gap-1 [&_button]:text-white [&_button:hover]:bg-white/15">
+            <LanguageToggle signedIn={Boolean(profile)} />
+            {home ? null : (
+              <Button asChild variant="ghost" size="sm" className="border border-white/40 text-white hover:bg-white/15 hover:text-white">
+                <Link href="/login">{t("auth.signIn")}</Link>
               </Button>
             )}
           </div>
-        </section>
+        </header>
 
+        <section className="container grid max-w-5xl items-center gap-4 pb-10 pt-4 md:grid-cols-2 md:gap-10 md:pb-16 md:pt-10">
+          <div className="text-center md:order-2">
+            <CityScene id="hero-scene" className="mx-auto max-w-[17rem] sm:max-w-sm md:max-w-md" />
+          </div>
+          <div className="text-center md:order-1 md:text-left">
+            <h1 className="text-3xl font-extrabold leading-tight tracking-tight sm:text-5xl">{t("landing.headline")}</h1>
+            <p className="mx-auto mt-4 max-w-xl text-base text-white/85 sm:text-lg md:mx-0">{t("landing.body")}</p>
+
+            <div className="mx-auto mt-8 max-w-xl md:mx-0">
+              {home ? (
+                <Button asChild size="lg" className="h-14 rounded-2xl bg-white px-8 text-base text-primary hover:bg-violet-50">
+                  <Link href={home}>
+                    {t("landing.getStarted")} <ArrowRight aria-hidden />
+                  </Link>
+                </Button>
+              ) : showDemo ? (
+                <div className="space-y-3">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-white/70">{t("landing.tryIt")}</p>
+                  <DemoSignIn hero />
+                  <Link href="/login?mode=signup" className="inline-block pt-1 text-sm font-semibold text-white underline-offset-4 hover:underline">
+                    {t("auth.signUpCta")} →
+                  </Link>
+                </div>
+              ) : (
+                <Button asChild size="lg" className="h-14 rounded-2xl bg-white px-8 text-base text-primary hover:bg-violet-50">
+                  <Link href="/login?mode=signup">
+                    {t("landing.getStarted")} <ArrowRight aria-hidden />
+                  </Link>
+                </Button>
+              )}
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <main className="container max-w-3xl pb-16 pt-10">
         <section aria-labelledby="how-heading" className="space-y-4">
           <h2 id="how-heading" className="text-center text-xl font-bold">
             {t("landing.howTitle")}
           </h2>
           <ol className="grid gap-3 sm:grid-cols-3">
             {steps.map((step, i) => (
-              <li key={step.title} className="relative rounded-2xl border bg-card p-5 shadow-sm">
-                <span className="absolute right-4 top-4 text-3xl font-extrabold text-muted-foreground/25">{i + 1}</span>
+              <li key={step.title} className="relative rounded-3xl border bg-card p-5 shadow-soft transition-transform hover:-translate-y-0.5">
+                <span className="absolute right-4 top-4 text-3xl font-extrabold text-primary/20">{i + 1}</span>
                 <span className={`mb-3 flex size-12 items-center justify-center rounded-2xl ${step.tone}`}>
                   <step.icon className="size-6" aria-hidden />
                 </span>
@@ -87,7 +95,7 @@ export default async function LandingPage() {
           </ol>
         </section>
 
-        <section className="mt-10 rounded-2xl border bg-card p-5 text-sm shadow-sm">
+        <section className="mt-10 rounded-3xl border bg-card p-5 text-sm shadow-soft">
           <h2 className="flex items-center gap-2 font-bold">
             <CircleSlash className="size-4 text-rose-600" aria-hidden /> {t("landing.f2Title")}
           </h2>

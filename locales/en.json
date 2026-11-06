@@ -200,7 +200,14 @@
     "demoAccounts": "Demo accounts are listed in the project README.",
     "demoHeading": "Demo accounts",
     "demoOperator": "Sign in as demo operator",
-    "demoCitizen": "Sign in as demo citizen"
+    "demoCitizen": "Sign in as demo citizen",
+    "welcomeTitle": "Sign in to your account",
+    "createTitle": "Create your account",
+    "newHere": "New here?",
+    "haveAccount": "Already have an account?",
+    "or": "or",
+    "quickTry": "Just looking? Try it in one tap",
+    "sidePitch": "Know when your garbage will really be collected — only from notices the city has checked."
   },
   "landing": {
     "headline": "Know when your garbage will really be collected.",
@@ -276,5 +283,11 @@
       "maybe": "Maybe",
       "replacement": "Extra"
     }
+  },
+  "greeting": {
+    "hello": "Hello!",
+    "morning": "Good morning",
+    "afternoon": "Good afternoon",
+    "evening": "Good evening"
   }
 }

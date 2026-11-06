@@ -8,7 +8,7 @@ export default function GlobalError({ reset }: { error: Error & { digest?: strin
         <main style={{ maxWidth: 420, padding: 24, textAlign: "center" }}>
           <h1 style={{ fontSize: 20 }}>Something went wrong</h1>
           <p style={{ color: "#4b5563", fontSize: 14 }}>CivicAI could not load this page. Your data is safe — please try again.</p>
-          <button onClick={reset} style={{ marginTop: 16, padding: "10px 16px", borderRadius: 8, border: 0, background: "#126b63", color: "#fff", cursor: "pointer" }}>
+          <button onClick={reset} style={{ marginTop: 16, padding: "10px 16px", borderRadius: 8, border: 0, background: "#5739d0", color: "#fff", cursor: "pointer" }}>
             Try again
           </button>
         </main>

@@ -23,9 +23,9 @@ export default async function CitizenAppLayout({ children }: { children: React.R
   if (!ward) redirect("/onboarding");
 
   return (
-    <div className="min-h-dvh pb-20 md:pb-8">
-      <header className="sticky top-0 z-30 border-b bg-card/95 backdrop-blur">
-        <div className="container flex h-14 items-center justify-between gap-2">
+    <div className="min-h-dvh pb-24 md:pb-8">
+      <header className="sticky top-0 z-30 border-b border-primary/10 bg-card/90 backdrop-blur-md">
+        <div className="container flex h-16 items-center justify-between gap-2">
           <Brand href="/dashboard" />
           <CitizenNav unread={unread} variant="top" />
           <div className="flex items-center">
@@ -33,10 +33,12 @@ export default async function CitizenAppLayout({ children }: { children: React.R
             <SignOutButton label={t("nav.signOut")} />
           </div>
         </div>
-        <div className="container flex items-center gap-1.5 pb-2 text-xs text-muted-foreground">
-          <MapPin className="size-3.5 text-primary" aria-hidden />
-          <span className="truncate">{ward.name}</span>
-          <Link href="/onboarding" className="ml-1 shrink-0 text-primary underline-offset-2 hover:underline">
+        <div className="container flex items-center gap-2 pb-2.5 text-xs">
+          <span className="flex min-w-0 items-center gap-1.5 rounded-full bg-secondary px-3 py-1 font-medium text-secondary-foreground">
+            <MapPin className="size-3.5 shrink-0 text-primary" aria-hidden />
+            <span className="truncate">{ward.name}</span>
+          </span>
+          <Link href="/onboarding" className="shrink-0 font-semibold text-primary underline-offset-2 hover:underline">
             {t("dashboard.changeWard")}
           </Link>
         </div>

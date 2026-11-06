@@ -28,8 +28,8 @@ const FormSchema = z.object({
 const CATEGORIES: { key: string; label: TKey; text?: TKey; Icon: typeof Truck; tone: string }[] = [
   { key: "missed", label: "report.cat.missed", text: "report.cat.missedText", Icon: CalendarX, tone: "bg-rose-100 text-rose-700" },
   { key: "bin", label: "report.cat.bin", text: "report.cat.binText", Icon: Trash, tone: "bg-amber-100 text-amber-700" },
-  { key: "skipped", label: "report.cat.skipped", text: "report.cat.skippedText", Icon: Truck, tone: "bg-sky-100 text-sky-700" },
-  { key: "other", label: "report.cat.other", Icon: PencilLine, tone: "bg-slate-100 text-slate-700" },
+  { key: "skipped", label: "report.cat.skipped", text: "report.cat.skippedText", Icon: Truck, tone: "bg-indigo-100 text-indigo-700" },
+  { key: "other", label: "report.cat.other", Icon: PencilLine, tone: "bg-violet-100 text-violet-700" },
 ];
 
 function Step({ n, title, children }: { n: number; title: string; children: React.ReactNode }) {
@@ -163,7 +163,7 @@ export function ComplaintForm({
                 aria-checked={active}
                 onClick={() => chooseCategory(c.key)}
                 className={cn(
-                  "relative flex min-h-[6.5rem] flex-col items-start justify-between gap-2 rounded-2xl border-2 bg-card p-3 text-left text-sm font-semibold transition-all hover:-translate-y-0.5 hover:shadow-md",
+                  "relative flex min-h-[6.5rem] flex-col items-start justify-between gap-2 rounded-2xl border-2 bg-card p-3 text-left shadow-soft text-sm font-semibold transition-all hover:-translate-y-0.5 hover:shadow-md",
                   active ? "border-primary shadow-md ring-2 ring-primary/20" : "border-border",
                 )}
               >

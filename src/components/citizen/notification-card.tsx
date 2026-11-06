@@ -15,7 +15,7 @@ const KIND: Record<TemplateKey, { Icon: typeof Info; tone: string; edge: string 
   verified_alternative: { Icon: CalendarClock, tone: "bg-emerald-100 text-emerald-700", edge: "border-l-emerald-500" },
   no_alternative_published: { Icon: CalendarX, tone: "bg-rose-100 text-rose-700", edge: "border-l-rose-500" },
   retraction: { Icon: Undo2, tone: "bg-slate-200 text-slate-700", edge: "border-l-slate-400" },
-  update: { Icon: Info, tone: "bg-sky-100 text-sky-700", edge: "border-l-sky-500" },
+  update: { Icon: Info, tone: "bg-violet-100 text-violet-700", edge: "border-l-violet-500" },
 };
 
 export function NotificationCard(props: {

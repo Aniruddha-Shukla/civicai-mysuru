@@ -19,8 +19,8 @@ export interface StripDay {
 }
 
 const LOOK: Record<PickupStatus, { tile: string; dot: string; Icon: typeof CalendarCheck }> = {
-  normal: { tile: "border-emerald-200 bg-emerald-50 text-emerald-900", dot: "bg-emerald-500", Icon: CalendarCheck },
-  replacement: { tile: "border-sky-200 bg-sky-50 text-sky-900", dot: "bg-sky-500", Icon: RefreshCw },
+  normal: { tile: "border-violet-200 bg-violet-50 text-violet-950", dot: "bg-violet-500", Icon: CalendarCheck },
+  replacement: { tile: "border-indigo-200 bg-indigo-50 text-indigo-950", dot: "bg-indigo-500", Icon: RefreshCw },
   moved: { tile: "border-amber-300 bg-amber-50 text-amber-900", dot: "bg-amber-500", Icon: CalendarClock },
   maybe: { tile: "border-dashed border-amber-400 bg-amber-50 text-amber-900", dot: "bg-amber-400", Icon: CircleQuestionMark },
   cancelled: { tile: "border-rose-300 bg-rose-50 text-rose-900", dot: "bg-rose-500", Icon: CalendarX },

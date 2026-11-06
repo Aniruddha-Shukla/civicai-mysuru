@@ -10,6 +10,7 @@ import { getSessionProfile } from "@/lib/auth";
 import { loadCitizenWardView } from "@/lib/data/citizen";
 import { prisma } from "@/lib/db";
 import { dayPartsFor, formatDayFor, getT, normalizeLang, weekdayNameFor, type Lang, type TFunction } from "@/lib/i18n";
+import { greetingKey } from "@/lib/greeting";
 import { buildPickupDays, type PickupDay } from "@/lib/pickups";
 import { formatTime12h } from "@/lib/time";
 
@@ -62,10 +63,15 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-7">
-      <h1 className="text-2xl font-bold">{t("home.hello", { name: profile.name.split(" ")[0] ?? profile.name })}</h1>
+      <div>
+        <p className="text-sm font-semibold text-primary">{t("greeting.hello")}</p>
+        <h1 className="text-3xl font-extrabold tracking-tight">
+          {t(greetingKey(now))}, {profile.name.split(" ")[0] ?? profile.name}
+        </h1>
+      </div>
 
       {unread > 0 ? (
-        <Link href="/notifications" className="flex items-center gap-3 rounded-2xl border border-primary/30 bg-secondary p-3 text-sm transition-colors hover:bg-accent">
+        <Link href="/notifications" className="flex items-center gap-3 rounded-2xl border border-primary/25 bg-card p-3 text-sm shadow-soft transition-colors hover:bg-accent">
           <span className="relative flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
             <Bell className="size-5" aria-hidden />
             <span className="absolute -right-1 -top-1 min-w-5 rounded-full bg-destructive px-1 text-center text-[11px] font-bold leading-5 text-white">{unread}</span>
@@ -90,15 +96,15 @@ export default async function DashboardPage() {
       ) : null}
 
       <section className="grid grid-cols-2 gap-3">
-        <Link href="/ask" className="group rounded-2xl border bg-card p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
-          <span className="mb-3 flex size-11 items-center justify-center rounded-xl bg-sky-100 text-sky-700">
+        <Link href="/ask" className="group rounded-3xl border bg-card p-4 shadow-soft transition-all hover:-translate-y-0.5 hover:border-primary/40">
+          <span className="mb-3 flex size-12 items-center justify-center rounded-2xl bg-violet-100 text-violet-700 transition-transform group-hover:scale-110">
             <MessageCircleQuestionMark className="size-6" aria-hidden />
           </span>
           <span className="block font-bold">{t("home.askTitle")}</span>
           <span className="block text-xs text-muted-foreground">{t("home.askBody")}</span>
         </Link>
-        <Link href="/report" className="group rounded-2xl border bg-card p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
-          <span className="mb-3 flex size-11 items-center justify-center rounded-xl bg-rose-100 text-rose-700">
+        <Link href="/report" className="group rounded-3xl border bg-card p-4 shadow-soft transition-all hover:-translate-y-0.5 hover:border-primary/40">
+          <span className="mb-3 flex size-12 items-center justify-center rounded-2xl bg-rose-100 text-rose-700 transition-transform group-hover:scale-110">
             <Megaphone className="size-6" aria-hidden />
           </span>
           <span className="block font-bold">{t("home.reportTitle")}</span>
@@ -140,10 +146,10 @@ export default async function DashboardPage() {
         {view.services.length === 0 ? (
           <EmptyState icon={CalendarDays} title={t("dashboard.noServices")} />
         ) : (
-          <ul className="divide-y rounded-2xl border bg-card">
+          <ul className="divide-y rounded-3xl border bg-card shadow-soft">
             {view.services.map((service) => (
               <li key={service.id} className="flex items-center gap-3 p-4">
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-secondary text-primary">
+                <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-secondary text-primary">
                   <CalendarDays className="size-5" aria-hidden />
                 </span>
                 <span className="min-w-0 flex-1">

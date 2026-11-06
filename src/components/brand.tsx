@@ -1,15 +1,23 @@
 import { Recycle } from "lucide-react";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
-export function Brand({ href = "/", subtitle }: { href?: string; subtitle?: string }) {
+export function Brand({ href = "/", subtitle, light = false }: { href?: string; subtitle?: string; light?: boolean }) {
   return (
-    <Link href={href} className="flex min-w-0 items-center gap-2 font-semibold">
-      <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+    <Link href={href} className="flex min-w-0 items-center gap-2.5 font-bold">
+      <span
+        className={cn(
+          "flex size-9 shrink-0 items-center justify-center rounded-xl text-white shadow-md",
+          light ? "bg-white/20 ring-1 ring-white/30" : "bg-hero shadow-primary/30",
+        )}
+      >
         <Recycle className="size-5" aria-hidden />
       </span>
-      <span className="min-w-0 truncate">
-        CivicAI <span className="text-primary">Mysuru</span>
-        {subtitle ? <span className="ml-2 hidden text-xs font-normal text-muted-foreground sm:inline">{subtitle}</span> : null}
+      <span className={cn("min-w-0 truncate text-lg", light && "text-white")}>
+        CivicAI <span className={light ? "text-violet-200" : "text-primary"}>Mysuru</span>
+        {subtitle ? (
+          <span className={cn("ml-2 hidden text-xs font-medium sm:inline", light ? "text-white/70" : "text-muted-foreground")}>{subtitle}</span>
+        ) : null}
       </span>
     </Link>
   );
