@@ -4,6 +4,7 @@ import { AuthCard } from "@/components/auth-card";
 import { Brand } from "@/components/brand";
 import { LanguageToggle } from "@/components/language-toggle";
 import { getSessionProfile } from "@/lib/auth";
+import { demoEnabled } from "@/lib/demo/accounts";
 import { isSupabaseConfigured, safeNextPath } from "@/lib/supabase/config";
 
 export const metadata: Metadata = { title: "Sign in" };
@@ -21,7 +22,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         <LanguageToggle signedIn={false} />
       </header>
       <main className="container flex flex-1 items-start justify-center py-6 sm:items-center">
-        <AuthCard defaultTab={mode === "signup" ? "signup" : "signin"} next={safeNextPath(next, "")} configured={isSupabaseConfigured()} />
+        <AuthCard defaultTab={mode === "signup" ? "signup" : "signin"} next={safeNextPath(next, "")} configured={isSupabaseConfigured()} demoLogin={isSupabaseConfigured() && demoEnabled()} />
       </main>
     </div>
   );

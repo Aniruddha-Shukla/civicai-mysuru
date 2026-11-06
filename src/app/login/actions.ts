@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/db";
+import { DEMO_CITIZEN_EMAIL, DEMO_OPERATOR_EMAIL, demoEnabled, demoPassword } from "@/lib/demo/accounts";
 import { isSupabaseConfigured, safeNextPath } from "@/lib/supabase/config";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { LoginSchema, SignupSchema } from "@/lib/validation/schemas";
@@ -38,6 +39,13 @@ export async function signInAction(input: unknown, next?: string): Promise<AuthR
     },
   });
   redirect(await destinationFor(data.user.id, safeNextPath(next, "")));
+}
+
+/** One-click sign-in to a demo account. The password stays on the server. */
+export async function demoSignInAction(role: unknown): Promise<AuthResult> {
+  if (role !== "operator" && role !== "citizen") return { error: "Unknown demo account." };
+  if (!demoEnabled()) return { error: "Demo sign-in is turned off on this deployment." };
+  return signInAction({ email: role === "operator" ? DEMO_OPERATOR_EMAIL : DEMO_CITIZEN_EMAIL, password: demoPassword(role) });
 }
 
 export async function signUpAction(input: unknown): Promise<AuthResult> {

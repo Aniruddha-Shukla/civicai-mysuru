@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { LoaderCircle, MailCheck } from "lucide-react";
+import { LoaderCircle, MailCheck, ShieldCheck, User } from "lucide-react";
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { useI18n } from "@/components/i18n-provider";
@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { signInAction, signUpAction } from "@/app/login/actions";
+import { demoSignInAction, signInAction, signUpAction } from "@/app/login/actions";
 import { LoginSchema, SignupSchema } from "@/lib/validation/schemas";
 
 function FieldError({ message }: { message?: string }) {
@@ -121,7 +121,55 @@ function SignUpForm() {
   );
 }
 
-export function AuthCard({ defaultTab = "signin", next, configured }: { defaultTab?: "signin" | "signup"; next?: string; configured: boolean }) {
+function DemoSignIn() {
+  const { t } = useI18n();
+  const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState<"operator" | "citizen" | null>(null);
+  const [, startTransition] = useTransition();
+  const signIn = (role: "operator" | "citizen") =>
+    startTransition(async () => {
+      setError(null);
+      setPending(role);
+      const result = await demoSignInAction(role);
+      if (result?.error) {
+        setError(result.error);
+        setPending(null);
+      }
+    });
+
+  return (
+    <div className="mt-5 space-y-2 border-t pt-4">
+      <p className="text-center text-xs font-medium uppercase tracking-wide text-muted-foreground">{t("auth.demoHeading")}</p>
+      <div className="grid gap-2 sm:grid-cols-2">
+        <Button type="button" variant="outline" disabled={pending !== null} onClick={() => signIn("operator")}>
+          {pending === "operator" ? <LoaderCircle className="animate-spin" aria-hidden /> : <ShieldCheck aria-hidden />}
+          {t("auth.demoOperator")}
+        </Button>
+        <Button type="button" variant="outline" disabled={pending !== null} onClick={() => signIn("citizen")}>
+          {pending === "citizen" ? <LoaderCircle className="animate-spin" aria-hidden /> : <User aria-hidden />}
+          {t("auth.demoCitizen")}
+        </Button>
+      </div>
+      {error ? (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      ) : null}
+    </div>
+  );
+}
+
+export function AuthCard({
+  defaultTab = "signin",
+  next,
+  configured,
+  demoLogin = false,
+}: {
+  defaultTab?: "signin" | "signup";
+  next?: string;
+  configured: boolean;
+  demoLogin?: boolean;
+}) {
   const { t } = useI18n();
   return (
     <Card className="w-full max-w-md">
@@ -142,12 +190,13 @@ export function AuthCard({ defaultTab = "signin", next, configured }: { defaultT
           </TabsList>
           <TabsContent value="signin">
             <SignInForm next={next} />
+            {demoLogin ? <DemoSignIn /> : null}
           </TabsContent>
           <TabsContent value="signup">
             <SignUpForm />
           </TabsContent>
         </Tabs>
-        <p className="mt-4 text-center text-xs text-muted-foreground">{t("auth.demoAccounts")}</p>
+        {demoLogin ? null : <p className="mt-4 text-center text-xs text-muted-foreground">{t("auth.demoAccounts")}</p>}
       </CardContent>
     </Card>
   );

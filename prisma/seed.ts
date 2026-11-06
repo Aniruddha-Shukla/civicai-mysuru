@@ -7,7 +7,7 @@
  */
 import { PrismaClient, type Role } from "@prisma/client";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import { DEMO_CITIZEN_EMAIL, DEMO_OPERATOR_EMAIL } from "../src/lib/demo/accounts";
+import { DEMO_CITIZEN_EMAIL, DEMO_OPERATOR_EMAIL, demoPassword } from "../src/lib/demo/accounts";
 import { DEMO, refreshDemoScenarios, upsertDemoWardsAndServices } from "../src/lib/demo/scenarios";
 
 const fromBuild = process.argv.includes("--from-build");
@@ -26,14 +26,14 @@ const accounts: DemoAccount[] = [
     role: "OPERATOR",
     name: "Demo Operator (MCC Control Room)",
     email: DEMO_OPERATOR_EMAIL,
-    password: process.env.DEMO_OPERATOR_PASSWORD?.trim() || "CivicAI-Operator-2026",
+    password: demoPassword("operator"),
     wardId: null,
   },
   {
     role: "CITIZEN",
     name: "Demo Citizen",
     email: DEMO_CITIZEN_EMAIL,
-    password: process.env.DEMO_CITIZEN_PASSWORD?.trim() || "CivicAI-Citizen-2026",
+    password: demoPassword("citizen"),
     wardId: DEMO.ward.w1,
   },
 ];

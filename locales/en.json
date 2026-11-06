@@ -170,7 +170,10 @@
     "checkEmail": "Check your email to confirm your account, then sign in.",
     "notConfigured": "Sign-in is not configured on this deployment yet (Supabase environment variables are missing).",
     "operatorNote": "Municipal operator accounts are issued by the administrator and cannot be created here.",
-    "demoAccounts": "Demo accounts are listed in the project README."
+    "demoAccounts": "Demo accounts are listed in the project README.",
+    "demoHeading": "Demo accounts",
+    "demoOperator": "Sign in as demo operator",
+    "demoCitizen": "Sign in as demo citizen"
   },
   "landing": {
     "headline": "Know when your garbage will really be collected.",
