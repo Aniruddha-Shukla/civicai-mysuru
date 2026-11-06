@@ -40,6 +40,14 @@
       "special_event": "Special event",
       "operational": "Operational constraint",
       "emergency": "Emergency decision"
+    },
+    "noPickupOn": "No regular pickup on {date}",
+    "why": "Why:",
+    "howDoWeKnow": "How do we know this?",
+    "trust": {
+      "VERIFIED": "Confirmed by the city",
+      "UNVERIFIED": "Not confirmed yet",
+      "UNAVAILABLE": "No new date yet"
     }
   },
   "dashboard": {
@@ -82,6 +90,12 @@
       "no_alternative_published": "No alternative yet",
       "retraction": "Notice withdrawn",
       "update": "Follow-up update"
+    },
+    "kind": {
+      "verified_alternative": "Pickup moved to a new day",
+      "no_alternative_published": "Pickup affected",
+      "retraction": "Earlier alert cancelled",
+      "update": "New information"
     }
   },
   "ask": {
@@ -123,7 +137,20 @@
     "submitted": "Complaint submitted",
     "yourComplaints": "Your complaints",
     "noComplaints": "No complaints yet",
-    "noComplaintsBody": "Complaints you submit will appear here so you can track them."
+    "noComplaintsBody": "Complaints you submit will appear here so you can track them.",
+    "step1": "What is the problem?",
+    "step2": "Tell us more",
+    "step3": "Add a photo (optional)",
+    "addPhoto": "Take or choose a photo",
+    "cat": {
+      "missed": "Garbage not picked up",
+      "missedText": "Garbage was not picked up from my street on the scheduled day.",
+      "bin": "Overflowing bin",
+      "binText": "The community bin near my house is overflowing and needs to be cleared.",
+      "skipped": "Vehicle skipped my lane",
+      "skippedText": "The collection vehicle skipped our lane.",
+      "other": "Something else"
+    }
   },
   "tracker": {
     "title": "Complaint status",
@@ -186,7 +213,17 @@
     "f2Title": "Honest when nothing is published",
     "f2Body": "If no alternative schedule exists, you're told exactly that — never a guessed time.",
     "f3Title": "In English and ಕನ್ನಡ",
-    "f3Body": "Translations are checked so dates and times can never change."
+    "f3Body": "Translations are checked so dates and times can never change.",
+    "howTitle": "How it works",
+    "step1Title": "The city confirms a change",
+    "step1Body": "Holiday, breakdown or road closure: an official checks the notice first.",
+    "step2Title": "You get a simple alert",
+    "step2Body": "Only people in your ward are told, in English or ಕನ್ನಡ.",
+    "step3Title": "You know when to put waste out",
+    "step3Body": "If no new date is announced yet, we say so. No guessing.",
+    "tryIt": "Try the demo",
+    "tryCitizen": "Try it as a citizen",
+    "tryOperator": "Try it as a city operator"
   },
   "common": {
     "loading": "Loading…",
@@ -204,5 +241,40 @@
   },
   "ai": {
     "unavailable": "AI assistance is temporarily unavailable. Everything else keeps working — alerts and schedules always come from verified records."
+  },
+  "home": {
+    "hello": "Hello, {name}",
+    "nextPickup": "Your next pickup",
+    "onSchedule": "On schedule",
+    "pickupMoved": "Pickup moved",
+    "noPickup": "No pickup",
+    "mayChange": "May change",
+    "replacement": "Replacement pickup",
+    "movedTo": "New pickup",
+    "replaces": "Instead of {date}",
+    "noNewDate": "The city has not announced a new date yet. We will alert you as soon as it does.",
+    "notConfirmed": "The city has not confirmed this change yet. Keep following your usual day for now.",
+    "keepReady": "Keep your waste ready before {time}.",
+    "nothingScheduled": "No pickups in the next two weeks.",
+    "twoWeeks": "Next 2 weeks",
+    "tapDay": "Tap a day to see what is happening",
+    "seeNotice": "See the notice",
+    "changes": "Changes to your pickup",
+    "allGood": "All pickups are on schedule",
+    "allGoodBody": "Nothing has changed in your ward. Keep your waste ready on your usual days.",
+    "usual": "Your usual schedule",
+    "every": "Every {days}",
+    "everyDay": "Every day",
+    "askTitle": "Ask a question",
+    "askBody": "Get answers in English or ಕನ್ನಡ",
+    "reportTitle": "Report a problem",
+    "reportBody": "Missed pickup? Tell the city.",
+    "status": {
+      "normal": "Normal",
+      "moved": "Moved",
+      "cancelled": "No pickup",
+      "maybe": "Maybe",
+      "replacement": "Extra"
+    }
   }
 }

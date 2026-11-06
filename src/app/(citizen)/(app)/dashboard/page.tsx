@@ -1,20 +1,48 @@
-import { Bell, CalendarDays, Clock, Megaphone, MessageCircleQuestionMark, ShieldCheck } from "lucide-react";
+import { Bell, CalendarDays, ChevronRight, Clock, Megaphone, MessageCircleQuestionMark, ShieldCheck } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { NextPickup } from "@/components/citizen/next-pickup";
+import { PickupStrip, type StripDay } from "@/components/citizen/pickup-strip";
 import { EmptyState } from "@/components/empty-state";
 import { EventCard } from "@/components/event-card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getSessionProfile } from "@/lib/auth";
 import { loadCitizenWardView } from "@/lib/data/citizen";
 import { prisma } from "@/lib/db";
-import { formatDateFor, getT, normalizeLang, weekdayNameFor } from "@/lib/i18n";
-import { upcomingCollectionDays } from "@/lib/schedule";
-import { formatTime12h, istDateKey, istMidnight } from "@/lib/time";
+import { dayPartsFor, formatDayFor, getT, normalizeLang, weekdayNameFor, type Lang, type TFunction } from "@/lib/i18n";
+import { buildPickupDays, type PickupDay } from "@/lib/pickups";
+import { formatTime12h } from "@/lib/time";
 
-export const metadata: Metadata = { title: "Dashboard" };
+export const metadata: Metadata = { title: "Home" };
+
+function toStripDay(d: PickupDay, lang: Lang, t: TFunction): StripDay {
+  const day = formatDayFor(lang, d.date);
+  const time = formatTime12h(d.time);
+  const base = { key: `${d.dateKey}|${d.serviceId}|${d.status}`, status: d.status, ...dayPartsFor(lang, d.date), noticeId: d.eventId };
+  switch (d.status) {
+    case "moved":
+      return {
+        ...base,
+        title: t("home.pickupMoved"),
+        detail: d.alternative
+          ? `${d.serviceName}: ${day} → ${formatDayFor(lang, d.alternative.date)}, ${formatTime12h(d.alternative.time)}`
+          : d.serviceName,
+      };
+    case "cancelled":
+      return { ...base, title: `${t("home.noPickup")} · ${day}`, detail: `${d.serviceName}. ${t("home.noNewDate")}` };
+    case "maybe":
+      return { ...base, title: `${t("home.mayChange")} · ${day}`, detail: `${d.serviceName}. ${t("home.notConfirmed")}` };
+    case "replacement":
+      return {
+        ...base,
+        title: `${t("home.replacement")} · ${day}, ${time}`,
+        detail: `${d.serviceName}. ${d.originalDate ? t("home.replaces", { date: formatDayFor(lang, d.originalDate) }) : ""}`,
+        noticeId: undefined,
+      };
+    default:
+      return { ...base, title: `${day} · ${time}`, detail: `${d.serviceName} · ${t("home.onSchedule")}` };
+  }
+}
 
 export default async function DashboardPage() {
   const profile = await getSessionProfile();
@@ -29,37 +57,66 @@ export default async function DashboardPage() {
   ]);
   if (!view) redirect("/onboarding");
 
-  const affected = new Set(view.events.map((e) => `${e.serviceId}|${istDateKey(e.affectedDate)}`));
+  const pickups = buildPickupDays(view.services, view.events, now, 14);
+  const strip = pickups.map((d) => toStripDay(d, lang, t));
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-bold sm:text-2xl">{t("dashboard.greeting", { name: profile.name })}</h1>
-        <p className="text-sm text-muted-foreground">
-          {t("dashboard.yourWard")}: {view.ward.name} · {view.ward.zone}
-        </p>
-      </div>
+    <div className="space-y-7">
+      <h1 className="text-2xl font-bold">{t("home.hello", { name: profile.name.split(" ")[0] ?? profile.name })}</h1>
 
       {unread > 0 ? (
-        <Link href="/notifications" className="flex items-center justify-between gap-3 rounded-lg border border-primary/30 bg-secondary p-3 text-sm">
-          <span className="flex items-center gap-2">
-            <Bell className="size-4 text-primary" aria-hidden />
-            {t("dashboard.unreadAlerts", { count: unread })}
+        <Link href="/notifications" className="flex items-center gap-3 rounded-2xl border border-primary/30 bg-secondary p-3 text-sm transition-colors hover:bg-accent">
+          <span className="relative flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+            <Bell className="size-5" aria-hidden />
+            <span className="absolute -right-1 -top-1 min-w-5 rounded-full bg-destructive px-1 text-center text-[11px] font-bold leading-5 text-white">{unread}</span>
           </span>
-          <span className="font-medium text-primary">{t("dashboard.viewAlerts")} →</span>
+          <span className="flex-1 font-medium">{t("dashboard.unreadAlerts", { count: unread })}</span>
+          <ChevronRight className="size-5 text-primary" aria-hidden />
         </Link>
       ) : null}
 
+      <NextPickup day={pickups[0] ?? null} lang={lang} />
+
+      {strip.length > 0 ? (
+        <section aria-labelledby="strip-heading" className="space-y-2">
+          <div className="flex items-baseline justify-between gap-2">
+            <h2 id="strip-heading" className="text-lg font-bold">
+              {t("home.twoWeeks")}
+            </h2>
+            <span className="text-xs text-muted-foreground">{t("home.tapDay")}</span>
+          </div>
+          <PickupStrip days={strip} />
+        </section>
+      ) : null}
+
+      <section className="grid grid-cols-2 gap-3">
+        <Link href="/ask" className="group rounded-2xl border bg-card p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+          <span className="mb-3 flex size-11 items-center justify-center rounded-xl bg-sky-100 text-sky-700">
+            <MessageCircleQuestionMark className="size-6" aria-hidden />
+          </span>
+          <span className="block font-bold">{t("home.askTitle")}</span>
+          <span className="block text-xs text-muted-foreground">{t("home.askBody")}</span>
+        </Link>
+        <Link href="/report" className="group rounded-2xl border bg-card p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+          <span className="mb-3 flex size-11 items-center justify-center rounded-xl bg-rose-100 text-rose-700">
+            <Megaphone className="size-6" aria-hidden />
+          </span>
+          <span className="block font-bold">{t("home.reportTitle")}</span>
+          <span className="block text-xs text-muted-foreground">{t("home.reportBody")}</span>
+        </Link>
+      </section>
+
       <section aria-labelledby="notices-heading" className="space-y-3">
-        <h2 id="notices-heading" className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          {t("dashboard.currentNotices")}
+        <h2 id="notices-heading" className="text-lg font-bold">
+          {t("home.changes")}
         </h2>
         {view.events.length === 0 ? (
-          <EmptyState icon={ShieldCheck} title={t("dashboard.noDisruptions")} body={t("dashboard.noDisruptionsBody")} />
+          <EmptyState icon={ShieldCheck} title={t("home.allGood")} body={t("home.allGoodBody")} />
         ) : (
           view.events.map((event) => (
             <EventCard
               key={event.id}
+              id={`notice-${event.id}`}
               lang={lang}
               serviceName={event.service.name}
               eventType={event.eventType}
@@ -76,61 +133,35 @@ export default async function DashboardPage() {
         )}
       </section>
 
-      <section aria-labelledby="schedule-heading" className="space-y-3">
-        <h2 id="schedule-heading" className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          {t("dashboard.normalSchedule")}
+      <section aria-labelledby="usual-heading" className="space-y-2">
+        <h2 id="usual-heading" className="text-lg font-bold">
+          {t("home.usual")}
         </h2>
         {view.services.length === 0 ? (
           <EmptyState icon={CalendarDays} title={t("dashboard.noServices")} />
         ) : (
-          view.services.map((service) => {
-            const upcoming = upcomingCollectionDays(now, service.normalWeekdays, 3);
-            return (
-              <Card key={service.id}>
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex flex-wrap items-center justify-between gap-2">
-                    {service.name}
-                    <Badge variant="secondary">{t(`dashboard.frequency.${service.frequency}`)}</Badge>
-                  </CardTitle>
-                  <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                    <Clock className="size-4" aria-hidden />
-                    {service.frequency === "DAILY" ? t("dashboard.frequency.DAILY") : service.normalWeekdays.map((d) => weekdayNameFor(lang, d)).join(", ")} ·{" "}
-                    {formatTime12h(service.normalTime)}
-                  </p>
-                </CardHeader>
-                <CardContent>
-                  <p className="mb-2 text-xs font-medium text-muted-foreground">{t("dashboard.upcoming")}</p>
-                  <ul className="grid gap-2">
-                    {upcoming.map((key) => {
-                      const isAffected = affected.has(`${service.id}|${key}`);
-                      return (
-                        <li key={key} className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-muted/60 px-3 py-2 text-sm">
-                          <span className={isAffected ? "line-through decoration-destructive/60" : undefined}>{formatDateFor(lang, istMidnight(key))}</span>
-                          {isAffected ? <Badge variant="destructive">{t("dashboard.affected")}</Badge> : null}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </CardContent>
-              </Card>
-            );
-          })
+          <ul className="divide-y rounded-2xl border bg-card">
+            {view.services.map((service) => (
+              <li key={service.id} className="flex items-center gap-3 p-4">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-secondary text-primary">
+                  <CalendarDays className="size-5" aria-hidden />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block font-semibold">{service.name}</span>
+                  <span className="block text-sm text-muted-foreground">
+                    {service.frequency === "DAILY"
+                      ? t("home.everyDay")
+                      : t("home.every", { days: service.normalWeekdays.map((d) => weekdayNameFor(lang, d)).join(", ") })}
+                  </span>
+                </span>
+                <span className="flex items-center gap-1 text-sm font-semibold">
+                  <Clock className="size-4 text-muted-foreground" aria-hidden />
+                  {formatTime12h(service.normalTime)}
+                </span>
+              </li>
+            ))}
+          </ul>
         )}
-      </section>
-
-      <section className="grid gap-3 sm:grid-cols-2">
-        <Button asChild variant="outline" className="h-auto justify-start whitespace-normal p-4 text-left">
-          <Link href="/ask">
-            <MessageCircleQuestionMark className="text-primary" aria-hidden />
-            {t("dashboard.askCta")}
-          </Link>
-        </Button>
-        <Button asChild variant="outline" className="h-auto justify-start whitespace-normal p-4 text-left">
-          <Link href="/report">
-            <Megaphone className="text-primary" aria-hidden />
-            {t("dashboard.reportCta")}
-          </Link>
-        </Button>
       </section>
     </div>
   );

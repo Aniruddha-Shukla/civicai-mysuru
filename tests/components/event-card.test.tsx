@@ -42,14 +42,19 @@ describe("EventCard", () => {
   it("UNVERIFIED: renders 'A possible alternative may be Wednesday.' with its own treatment", () => {
     render(<EventCard {...props} alternative={{ status: "UNVERIFIED", arrangement: { ...arrangement, verificationStatus: "UNVERIFIED", lastVerifiedAt: null } }} />);
     expect(screen.getByText("A possible alternative may be Wednesday.")).toBeTruthy();
-    expect(screen.getAllByText("Unverified").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Not confirmed yet").length).toBeGreaterThan(0);
   });
 
   it("always shows source, verification status and last-verified time", () => {
     render(<EventCard {...props} />);
     expect(screen.getAllByText(/MCC Circular No. 114\/2026/).length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Verified").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Confirmed by the city").length).toBeGreaterThan(0);
     expect(screen.getByText(/Last verified:/)).toBeTruthy();
+  });
+
+  it("leads with a plain-language headline for non-technical readers", () => {
+    render(<EventCard {...props} />);
+    expect(screen.getByText(/No regular pickup on Monday/)).toBeTruthy();
   });
 
   it("shows 'Not yet verified' when lastVerifiedAt is null", () => {

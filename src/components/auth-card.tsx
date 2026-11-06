@@ -121,7 +121,8 @@ function SignUpForm() {
   );
 }
 
-function DemoSignIn() {
+/** One-click demo sign-in. `hero` renders the large landing-page version. */
+export function DemoSignIn({ hero = false }: { hero?: boolean }) {
   const { t } = useI18n();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState<"operator" | "citizen" | null>(null);
@@ -136,6 +137,28 @@ function DemoSignIn() {
         setPending(null);
       }
     });
+
+  if (hero) {
+    return (
+      <div className="space-y-2">
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Button type="button" size="lg" className="h-14 rounded-2xl text-base" disabled={pending !== null} onClick={() => signIn("citizen")}>
+            {pending === "citizen" ? <LoaderCircle className="animate-spin" aria-hidden /> : <User aria-hidden />}
+            {t("landing.tryCitizen")}
+          </Button>
+          <Button type="button" size="lg" variant="outline" className="h-14 rounded-2xl bg-card text-base" disabled={pending !== null} onClick={() => signIn("operator")}>
+            {pending === "operator" ? <LoaderCircle className="animate-spin" aria-hidden /> : <ShieldCheck aria-hidden />}
+            {t("landing.tryOperator")}
+          </Button>
+        </div>
+        {error ? (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        ) : null}
+      </div>
+    );
+  }
 
   return (
     <div className="mt-5 space-y-2 border-t pt-4">

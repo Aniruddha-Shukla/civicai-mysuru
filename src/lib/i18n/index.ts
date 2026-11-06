@@ -74,3 +74,29 @@ const EN_WEEKDAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"
 export function weekdayNameFor(lang: Lang, weekday: number): string {
   return (lang === "kn" ? KN_WEEKDAY_NAMES : EN_WEEKDAY_NAMES)[weekday] ?? "";
 }
+
+const partFormatters: Record<Lang, { weekday: Intl.DateTimeFormat; day: Intl.DateTimeFormat; month: Intl.DateTimeFormat; short: Intl.DateTimeFormat }> = {
+  en: {
+    weekday: new Intl.DateTimeFormat("en-IN", { timeZone: "Asia/Kolkata", weekday: "short" }),
+    day: new Intl.DateTimeFormat("en-IN", { timeZone: "Asia/Kolkata", day: "numeric" }),
+    month: new Intl.DateTimeFormat("en-IN", { timeZone: "Asia/Kolkata", month: "short" }),
+    short: new Intl.DateTimeFormat("en-IN", { timeZone: "Asia/Kolkata", weekday: "long", day: "numeric", month: "short" }),
+  },
+  kn: {
+    weekday: new Intl.DateTimeFormat("kn-IN", { timeZone: "Asia/Kolkata", weekday: "short" }),
+    day: new Intl.DateTimeFormat("kn-IN", { timeZone: "Asia/Kolkata", day: "numeric" }),
+    month: new Intl.DateTimeFormat("kn-IN", { timeZone: "Asia/Kolkata", month: "short" }),
+    short: new Intl.DateTimeFormat("kn-IN", { timeZone: "Asia/Kolkata", weekday: "long", day: "numeric", month: "short" }),
+  },
+};
+
+/** "Mon" / "9" / "Nov" pieces for calendar tiles (render on the server). */
+export function dayPartsFor(lang: Lang, date: Date) {
+  const f = partFormatters[lang];
+  return { weekday: f.weekday.format(date), day: f.day.format(date), month: f.month.format(date) };
+}
+
+/** "Monday, 9 Nov" in the UI language. */
+export function formatDayFor(lang: Lang, date: Date): string {
+  return partFormatters[lang].short.format(date);
+}

@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ImagePlus, LoaderCircle, LocateFixed, Send, WandSparkles, X } from "lucide-react";
+import { CalendarX, Camera, Check, LoaderCircle, LocateFixed, PencilLine, Send, Trash, Truck, WandSparkles, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
@@ -10,11 +10,12 @@ import { z } from "zod";
 import { useI18n } from "@/components/i18n-provider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { NativeSelect } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { LIMITS, PHOTO_MIME_TYPES } from "@/lib/constants";
+import type { TKey } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
 import { id, text } from "@/lib/validation/schemas";
 
 const FormSchema = z.object({
@@ -22,6 +23,26 @@ const FormSchema = z.object({
   eventId: z.string().optional(),
   description: text(LIMITS.complaint, 10),
 });
+
+/** Picture tiles so residents can report in one tap instead of typing from scratch. */
+const CATEGORIES: { key: string; label: TKey; text?: TKey; Icon: typeof Truck; tone: string }[] = [
+  { key: "missed", label: "report.cat.missed", text: "report.cat.missedText", Icon: CalendarX, tone: "bg-rose-100 text-rose-700" },
+  { key: "bin", label: "report.cat.bin", text: "report.cat.binText", Icon: Trash, tone: "bg-amber-100 text-amber-700" },
+  { key: "skipped", label: "report.cat.skipped", text: "report.cat.skippedText", Icon: Truck, tone: "bg-sky-100 text-sky-700" },
+  { key: "other", label: "report.cat.other", Icon: PencilLine, tone: "bg-slate-100 text-slate-700" },
+];
+
+function Step({ n, title, children }: { n: number; title: string; children: React.ReactNode }) {
+  return (
+    <section className="space-y-3">
+      <h2 className="flex items-center gap-2 text-base font-bold">
+        <span className="flex size-7 items-center justify-center rounded-full bg-primary text-sm text-primary-foreground">{n}</span>
+        {title}
+      </h2>
+      {children}
+    </section>
+  );
+}
 
 export function ComplaintForm({
   services,
@@ -34,6 +55,7 @@ export function ComplaintForm({
 }) {
   const { t } = useI18n();
   const router = useRouter();
+  const [category, setCategory] = useState<string | null>(null);
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoError, setPhotoError] = useState<string | null>(null);
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
@@ -48,6 +70,16 @@ export function ComplaintForm({
   });
   const serviceId = form.watch("serviceId");
   const description = form.watch("description") ?? "";
+  const templates = CATEGORIES.flatMap((c) => (c.text ? [t(c.text)] : []));
+
+  function chooseCategory(key: string) {
+    setCategory(key);
+    const chosen = CATEGORIES.find((c) => c.key === key);
+    // Only replace the text if the citizen has not written their own words yet.
+    if (description.trim() === "" || templates.includes(description.trim())) {
+      form.setValue("description", chosen?.text ? t(chosen.text) : "", { shouldValidate: Boolean(chosen?.text) });
+    }
+  }
 
   function pickPhoto(file: File | null) {
     setPhotoError(null);
@@ -118,90 +150,140 @@ export function ComplaintForm({
   const relevantNotices = notices.filter((n) => n.serviceId === serviceId);
 
   return (
-    <form noValidate onSubmit={onSubmit} className="space-y-4">
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-1.5">
-          <Label htmlFor="serviceId">{t("report.service")}</Label>
-          <NativeSelect id="serviceId" {...form.register("serviceId")}>
-            {services.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-              </option>
-            ))}
-          </NativeSelect>
+    <form noValidate onSubmit={onSubmit} className="space-y-7">
+      <Step n={1} title={t("report.step1")}>
+        <div role="radiogroup" aria-label={t("report.step1")} className="grid grid-cols-2 gap-3">
+          {CATEGORIES.map((c) => {
+            const active = category === c.key;
+            return (
+              <button
+                key={c.key}
+                type="button"
+                role="radio"
+                aria-checked={active}
+                onClick={() => chooseCategory(c.key)}
+                className={cn(
+                  "relative flex min-h-[6.5rem] flex-col items-start justify-between gap-2 rounded-2xl border-2 bg-card p-3 text-left text-sm font-semibold transition-all hover:-translate-y-0.5 hover:shadow-md",
+                  active ? "border-primary shadow-md ring-2 ring-primary/20" : "border-border",
+                )}
+              >
+                <span className={cn("flex size-10 items-center justify-center rounded-xl", c.tone)}>
+                  <c.Icon className="size-5" aria-hidden />
+                </span>
+                {t(c.label)}
+                {active ? (
+                  <span className="absolute right-2 top-2 flex size-6 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                    <Check className="size-4" aria-hidden />
+                  </span>
+                ) : null}
+              </button>
+            );
+          })}
         </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="eventId">{t("report.linkNotice")}</Label>
-          <NativeSelect id="eventId" {...form.register("eventId")}>
-            <option value="">{t("report.noNotice")}</option>
-            {relevantNotices.map((n) => (
-              <option key={n.id} value={n.id}>
-                {n.label}
-              </option>
-            ))}
-          </NativeSelect>
-        </div>
-      </div>
+      </Step>
 
-      <div className="space-y-1.5">
-        <div className="flex items-end justify-between gap-2">
-          <Label htmlFor="description">{t("report.description")}</Label>
+      <Step n={2} title={t("report.step2")}>
+        <div className="space-y-1.5">
+          <Textarea
+            id="description"
+            rows={4}
+            maxLength={LIMITS.complaint}
+            placeholder={t("report.description")}
+            aria-label={t("report.description")}
+            className="text-base"
+            {...form.register("description")}
+          />
+          <div className="flex justify-between gap-2 text-xs text-muted-foreground">
+            <span className={form.formState.errors.description ? "text-destructive" : undefined}>
+              {form.formState.errors.description?.message ?? t("report.descriptionHelp")}
+            </span>
+            <span>{t("common.characters", { count: description.length, max: LIMITS.complaint })}</span>
+          </div>
           {aiAvailable ? (
             <Button type="button" variant="ghost" size="sm" onClick={aiDraft} disabled={drafting || description.trim().length === 0}>
               {drafting ? <LoaderCircle className="animate-spin" aria-hidden /> : <WandSparkles aria-hidden />}
               {t("report.aiDraft")}
             </Button>
           ) : null}
+          {draftNote ? (
+            <Alert variant={draftNote.tone}>
+              <AlertDescription>{draftNote.text}</AlertDescription>
+            </Alert>
+          ) : null}
         </div>
-        <Textarea id="description" rows={5} maxLength={LIMITS.complaint} {...form.register("description")} />
-        <div className="flex justify-between gap-2 text-xs text-muted-foreground">
-          <span>{form.formState.errors.description?.message ?? t("report.descriptionHelp")}</span>
-          <span>{t("common.characters", { count: description.length, max: LIMITS.complaint })}</span>
-        </div>
-        {draftNote ? (
-          <Alert variant={draftNote.tone}>
-            <AlertDescription>{draftNote.text}</AlertDescription>
-          </Alert>
-        ) : null}
-      </div>
 
-      <div className="space-y-1.5">
-        <Label htmlFor="photo">{t("report.photo")}</Label>
+        {services.length > 1 || relevantNotices.length > 0 ? (
+          <div className="grid gap-3 sm:grid-cols-2">
+            {services.length > 1 ? (
+              <div className="space-y-1.5">
+                <Label htmlFor="serviceId">{t("report.service")}</Label>
+                <NativeSelect id="serviceId" {...form.register("serviceId")}>
+                  {services.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name}
+                    </option>
+                  ))}
+                </NativeSelect>
+              </div>
+            ) : null}
+            {relevantNotices.length > 0 ? (
+              <div className="space-y-1.5">
+                <Label htmlFor="eventId">{t("report.linkNotice")}</Label>
+                <NativeSelect id="eventId" {...form.register("eventId")}>
+                  <option value="">{t("report.noNotice")}</option>
+                  {relevantNotices.map((n) => (
+                    <option key={n.id} value={n.id}>
+                      {n.label}
+                    </option>
+                  ))}
+                </NativeSelect>
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+      </Step>
+
+      <Step n={3} title={t("report.step3")}>
         {photo ? (
-          <div className="flex items-center justify-between gap-2 rounded-md border bg-muted/50 px-3 py-2 text-sm">
+          <div className="flex items-center justify-between gap-2 rounded-2xl border-2 border-primary/40 bg-secondary p-3 text-sm">
             <span className="flex min-w-0 items-center gap-2">
-              <ImagePlus className="size-4 shrink-0 text-primary" aria-hidden />
-              <span className="truncate">{photo.name}</span>
+              <Camera className="size-5 shrink-0 text-primary" aria-hidden />
+              <span className="truncate font-medium">{photo.name}</span>
             </span>
             <Button type="button" variant="ghost" size="icon" onClick={() => setPhoto(null)} aria-label="Remove photo">
               <X aria-hidden />
             </Button>
           </div>
         ) : (
-          <Input id="photo" type="file" accept={PHOTO_MIME_TYPES.join(",")} onChange={(e) => pickPhoto(e.target.files?.[0] ?? null)} />
+          <label className="flex cursor-pointer flex-col items-center gap-2 rounded-2xl border-2 border-dashed border-primary/40 bg-secondary/40 p-6 text-center transition-colors hover:bg-secondary">
+            <span className="flex size-12 items-center justify-center rounded-full bg-primary text-primary-foreground">
+              <Camera className="size-6" aria-hidden />
+            </span>
+            <span className="font-semibold text-primary">{t("report.addPhoto")}</span>
+            <span className="text-xs text-muted-foreground">{t("report.photoHelp")}</span>
+            <input type="file" className="sr-only" accept={PHOTO_MIME_TYPES.join(",")} onChange={(e) => pickPhoto(e.target.files?.[0] ?? null)} />
+          </label>
         )}
-        <p className={photoError ? "text-xs text-destructive" : "text-xs text-muted-foreground"}>{photoError ?? t("report.photoHelp")}</p>
-      </div>
+        {photoError ? <p className="text-xs text-destructive">{photoError}</p> : null}
 
-      <div className="space-y-1.5 rounded-md border p-3">
         {location ? (
-          <div className="flex items-center justify-between gap-2 text-sm">
+          <div className="flex items-center justify-between gap-2 rounded-xl border p-3 text-sm">
             <span className="flex items-center gap-2">
               <LocateFixed className="size-4 text-primary" aria-hidden />
-              {t("report.locationAttached")} ({location.lat}, {location.lng})
+              {t("report.locationAttached")}
             </span>
             <Button type="button" variant="ghost" size="icon" onClick={() => setLocation(null)} aria-label="Remove location">
               <X aria-hidden />
             </Button>
           </div>
         ) : (
-          <Button type="button" variant="outline" size="sm" onClick={attachLocation}>
+          <Button type="button" variant="outline" className="w-full" onClick={attachLocation}>
             <LocateFixed aria-hidden />
             {t("report.location")}
           </Button>
         )}
         <p className="text-xs text-muted-foreground">{t("report.locationHelp")}</p>
-      </div>
+      </Step>
 
       {serverError ? (
         <Alert variant="destructive">
@@ -209,7 +291,7 @@ export function ComplaintForm({
         </Alert>
       ) : null}
 
-      <Button type="submit" size="lg" className="w-full" disabled={submitting || services.length === 0}>
+      <Button type="submit" size="lg" className="h-14 w-full rounded-2xl text-base" disabled={submitting || services.length === 0}>
         {submitting ? <LoaderCircle className="animate-spin" aria-hidden /> : <Send aria-hidden />}
         {t("report.submit")}
       </Button>

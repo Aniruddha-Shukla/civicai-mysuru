@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Languages, LoaderCircle } from "lucide-react";
+import { CalendarClock, CalendarX, Check, Info, Languages, LoaderCircle, Undo2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -11,11 +11,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import type { TemplateKey } from "@/lib/notifications/templates";
 import { cn } from "@/lib/utils";
 
-const TEMPLATE_VARIANT: Record<TemplateKey, "verified" | "unavailable" | "destructive" | "secondary"> = {
-  verified_alternative: "verified",
-  no_alternative_published: "unavailable",
-  retraction: "destructive",
-  update: "secondary",
+const KIND: Record<TemplateKey, { Icon: typeof Info; tone: string; edge: string }> = {
+  verified_alternative: { Icon: CalendarClock, tone: "bg-emerald-100 text-emerald-700", edge: "border-l-emerald-500" },
+  no_alternative_published: { Icon: CalendarX, tone: "bg-rose-100 text-rose-700", edge: "border-l-rose-500" },
+  retraction: { Icon: Undo2, tone: "bg-slate-200 text-slate-700", edge: "border-l-slate-400" },
+  update: { Icon: Info, tone: "bg-sky-100 text-sky-700", edge: "border-l-sky-500" },
 };
 
 export function NotificationCard(props: {
@@ -64,18 +64,23 @@ export function NotificationCard(props: {
   }
 
   const showingTranslation = showTranslation && translation;
+  const kind = KIND[props.templateKey] ?? KIND.update;
 
   return (
-    <Card className={cn(props.unread && "border-primary/40 shadow-md")}>
+    <Card className={cn("border-l-4", (KIND[props.templateKey] ?? KIND.update).edge, props.unread && "shadow-md")}>
       <CardContent className="space-y-3 p-4">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant={TEMPLATE_VARIANT[props.templateKey] ?? "secondary"}>{t(`notifications.templates.${props.templateKey}`)}</Badge>
-            {props.unread ? <Badge>{t("notifications.new")}</Badge> : null}
+        <div className="flex items-start gap-3">
+          <span className={cn("flex size-11 shrink-0 items-center justify-center rounded-xl", kind.tone)}>
+            <kind.Icon className="size-6" aria-hidden />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="font-bold leading-snug">{t(`notifications.kind.${props.templateKey}`)}</p>
+            <p className="text-xs text-muted-foreground">
+              {t("notifications.forCollectionOn", { date: props.forDateLabel })} · <time>{props.sentAtLabel}</time>
+            </p>
           </div>
-          <time className="text-xs text-muted-foreground">{props.sentAtLabel}</time>
+          {props.unread ? <Badge className="shrink-0">{t("notifications.new")}</Badge> : null}
         </div>
-        <p className="text-xs font-medium text-muted-foreground">{t("notifications.forCollectionOn", { date: props.forDateLabel })}</p>
         {showingTranslation ? (
           <div className="space-y-1">
             <p lang="kn" className="leading-relaxed">
