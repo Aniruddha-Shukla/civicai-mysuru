@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { Brand } from "@/components/brand";
 import { CitizenNav } from "@/components/citizen-nav";
 import { LanguageToggle } from "@/components/language-toggle";
+import { ScrollReset } from "@/components/motion/scroll-reset";
 import { SignOutButton } from "@/components/sign-out-button";
 import { getSessionProfile } from "@/lib/auth";
 import { prisma } from "@/lib/db";
@@ -45,6 +46,7 @@ export default async function CitizenAppLayout({ children }: { children: React.R
       </header>
       <main className="container max-w-3xl py-5">{children}</main>
       <CitizenNav unread={unread} variant="bottom" />
+      <ScrollReset />
     </div>
   );
 }

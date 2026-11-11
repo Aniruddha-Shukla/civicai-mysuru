@@ -21,8 +21,8 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   const t = getT(await currentLang());
 
   return (
-    <div className="bg-hero flex min-h-dvh items-center justify-center p-3 sm:p-8">
-      <div className="grid w-full max-w-5xl overflow-hidden rounded-[2rem] bg-white/10 shadow-2xl shadow-black/30 ring-1 ring-white/15 backdrop-blur md:grid-cols-[1.1fr_1fr]">
+    <div className="bg-hero grain relative flex min-h-dvh items-center justify-center p-3 sm:p-8">
+      <div className="relative grid w-full max-w-5xl overflow-hidden rounded-[2rem] animate-in fade-in-0 zoom-in-95 duration-700 bg-white/10 shadow-2xl shadow-black/30 ring-1 ring-white/15 backdrop-blur md:grid-cols-[1.1fr_1fr]">
         {/* Picture side */}
         <aside className="flex flex-col gap-4 p-6 text-white sm:p-8">
           <div className="flex items-center justify-between gap-2">
@@ -31,7 +31,9 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
               <LanguageToggle signedIn={false} />
             </div>
           </div>
-          <CityScene id="login-scene" className="mx-auto max-w-[15rem] sm:max-w-xs md:my-auto md:max-w-md" />
+          <div data-parallax className="md:my-auto">
+            <CityScene id="login-scene" className="mx-auto max-w-[15rem] sm:max-w-xs md:max-w-md" />
+          </div>
           <p className="hidden text-center text-sm text-white/85 md:block">{t("auth.sidePitch")}</p>
         </aside>
 

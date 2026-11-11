@@ -86,3 +86,9 @@ export function buildPickupDays(services: ServiceInput[], events: EventInput[], 
 
   return result.sort((a, b) => a.dateKey.localeCompare(b.dateKey) || a.time.localeCompare(b.time));
 }
+
+/** Whole IST calendar days from `now` until `date` (0 = today, 1 = tomorrow). */
+export function daysUntil(now: Date, date: Date): number {
+  const [a, b] = [istDateKey(now), istDateKey(date)].map((k) => Date.parse(`${k}T00:00:00Z`));
+  return Math.round((b! - a!) / 86_400_000);
+}

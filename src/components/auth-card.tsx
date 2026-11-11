@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { demoSignInAction, signInAction, signUpAction } from "@/app/login/actions";
+import { markFreshSignIn } from "@/components/motion/scroll-reset";
 import { LoginSchema, SignupSchema } from "@/lib/validation/schemas";
 
 function FieldError({ message }: { message?: string }) {
@@ -41,6 +42,7 @@ function SignInForm({ next }: { next?: string }) {
       onSubmit={form.handleSubmit((values) =>
         startTransition(async () => {
           setError(null);
+          markFreshSignIn();
           const result = await signInAction(values, next);
           if (result?.error) setError(result.error);
         }),
@@ -149,6 +151,7 @@ export function DemoSignIn({ hero = false }: { hero?: boolean }) {
     startTransition(async () => {
       setError(null);
       setPending(role);
+      markFreshSignIn();
       const result = await demoSignInAction(role);
       if (result?.error) {
         setError(result.error);
@@ -163,6 +166,7 @@ export function DemoSignIn({ hero = false }: { hero?: boolean }) {
           <Button
             type="button"
             size="lg"
+            data-magnetic
             className="h-14 rounded-2xl bg-white text-base text-primary shadow-lg shadow-black/10 hover:bg-violet-50"
             disabled={pending !== null}
             onClick={() => signIn("citizen")}
@@ -173,6 +177,7 @@ export function DemoSignIn({ hero = false }: { hero?: boolean }) {
           <Button
             type="button"
             size="lg"
+            data-magnetic
             className="h-14 rounded-2xl border border-white/40 bg-white/10 text-base text-white shadow-none backdrop-blur hover:bg-white/20"
             disabled={pending !== null}
             onClick={() => signIn("operator")}

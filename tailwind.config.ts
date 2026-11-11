@@ -31,11 +31,21 @@ const config: Config = {
         drive: { from: { transform: "translateX(-34px)" }, to: { transform: "translateX(34px)" } },
         twinkle: { "0%, 100%": { opacity: "1" }, "50%": { opacity: "0.25" } },
         float: { "0%, 100%": { transform: "translateY(0)" }, "50%": { transform: "translateY(-6px)" } },
+        nudge: { "0%, 100%": { transform: "translateX(0)" }, "50%": { transform: "translateX(5px)" } },
+        aurora: {
+          "0%": { transform: "translate3d(0, 0, 0) scale(1)" },
+          "50%": { transform: "translate3d(8%, -6%, 0) scale(1.15)" },
+          "100%": { transform: "translate3d(-6%, 4%, 0) scale(0.95)" },
+        },
+        wiggle: { "0%, 100%": { transform: "rotate(0)" }, "25%": { transform: "rotate(-10deg)" }, "75%": { transform: "rotate(8deg)" } },
       },
       animation: {
         drive: "drive 7s ease-in-out infinite alternate",
         twinkle: "twinkle 3s ease-in-out infinite",
         float: "float 6s ease-in-out infinite",
+        nudge: "nudge 1.6s ease-in-out infinite",
+        aurora: "aurora 18s ease-in-out infinite alternate",
+        wiggle: "wiggle 0.5s ease-in-out",
       },
       borderRadius: {
         lg: "var(--radius)",

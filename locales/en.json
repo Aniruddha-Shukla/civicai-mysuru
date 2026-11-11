@@ -230,7 +230,19 @@
     "step3Body": "If no new date is announced yet, we say so. No guessing.",
     "tryIt": "Try the demo",
     "tryCitizen": "Try it as a citizen",
-    "tryOperator": "Try it as a city operator"
+    "tryOperator": "Try it as a city operator",
+    "previewTitle": "See what residents get",
+    "previewBody": "Pick a situation. The phone shows exactly what a resident would see.",
+    "previewExample": "Example situations",
+    "previewNormal": "A normal week",
+    "previewMoved": "The city moved the pickup",
+    "previewNone": "No new date announced yet",
+    "m1": "Checked by the city",
+    "m2": "English & ಕನ್ನಡ",
+    "m3": "Only your ward",
+    "m4": "No guessed dates",
+    "m5": "Report in 3 taps",
+    "scroll": "See how it works"
   },
   "common": {
     "loading": "Loading…",
@@ -282,7 +294,12 @@
       "cancelled": "No pickup",
       "maybe": "Maybe",
       "replacement": "Extra"
-    }
+    },
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "inDays": "In {count} days",
+    "scrollLeft": "Earlier days",
+    "scrollRight": "Later days"
   },
   "greeting": {
     "hello": "Hello!",

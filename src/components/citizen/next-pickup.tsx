@@ -1,7 +1,7 @@
 import { ArrowRight, CalendarCheck, CalendarClock, CalendarX, CircleQuestionMark, Clock, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { formatDayFor, getT, type Lang } from "@/lib/i18n";
-import type { PickupDay } from "@/lib/pickups";
+import { daysUntil, type PickupDay } from "@/lib/pickups";
 import { formatTime12h } from "@/lib/time";
 import { cn } from "@/lib/utils";
 
@@ -14,7 +14,7 @@ const STYLE = {
 } as const;
 
 /** The one-glance answer to "when is my next pickup?" — big, coloured, plain words. */
-export function NextPickup({ day, lang }: { day: PickupDay | null; lang: Lang }) {
+export function NextPickup({ day, lang, now }: { day: PickupDay | null; lang: Lang; now: Date }) {
   const t = getT(lang);
   if (!day) {
     return (
@@ -33,20 +33,30 @@ export function NextPickup({ day, lang }: { day: PickupDay | null; lang: Lang })
     maybe: t("home.mayChange"),
     cancelled: t("home.noPickup"),
   }[day.status];
+  // The day that matters to the resident: the new date if the pickup moved.
+  const when = daysUntil(now, day.status === "moved" && day.alternative ? day.alternative.date : day.date);
+  const countdown = when <= 0 ? t("home.today") : when === 1 ? t("home.tomorrow") : t("home.inDays", { count: when });
 
   return (
     <section
       aria-label={t("home.nextPickup")}
+      data-tilt="4"
       className={cn("relative overflow-hidden rounded-3xl p-5 text-white shadow-xl shadow-primary/25 sm:p-6", style.card)}
     >
+      <span className="glare" aria-hidden />
       <div className="pointer-events-none absolute -right-8 -top-8 size-40 rounded-full bg-white/10" aria-hidden />
       <div className="relative flex items-center justify-between gap-3">
         <p className="text-sm font-medium opacity-90">{t("home.nextPickup")}</p>
-        <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold backdrop-blur">{pill}</span>
+        <div className="flex flex-wrap justify-end gap-1.5">
+          {day.status !== "cancelled" ? (
+            <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-900 shadow-sm">{countdown}</span>
+          ) : null}
+          <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold backdrop-blur">{pill}</span>
+        </div>
       </div>
 
       <div className="relative mt-4 flex items-start gap-4">
-        <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-white/20">
+        <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-white/20 motion-safe:animate-float">
           <style.Icon className="size-8" aria-hidden />
         </div>
         <div className="min-w-0">
@@ -54,7 +64,7 @@ export function NextPickup({ day, lang }: { day: PickupDay | null; lang: Lang })
             <>
               <p className="text-lg font-semibold line-through decoration-2 opacity-80">{formatDayFor(lang, day.date)}</p>
               <p className="flex flex-wrap items-center gap-2 text-2xl font-extrabold leading-tight sm:text-3xl">
-                <ArrowRight className="size-6 shrink-0" aria-hidden />
+                <ArrowRight className="size-6 shrink-0 motion-safe:animate-nudge" aria-hidden />
                 {formatDayFor(lang, day.alternative.date)}
               </p>
               <p className="mt-1 flex items-center gap-1.5 text-base font-medium">
@@ -85,8 +95,8 @@ export function NextPickup({ day, lang }: { day: PickupDay | null; lang: Lang })
       </p>
 
       {day.eventId && day.status !== "replacement" ? (
-        <Link href={`#notice-${day.eventId}`} className="relative mt-3 inline-flex items-center gap-1 text-sm font-semibold underline-offset-4 hover:underline">
-          {t("home.seeNotice")} <ArrowRight className="size-4" aria-hidden />
+        <Link href={`#notice-${day.eventId}`} className="group relative mt-3 inline-flex items-center gap-1.5 rounded-full bg-white/15 px-4 py-2 text-sm font-semibold transition-colors hover:bg-white/25">
+          {t("home.seeNotice")} <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" aria-hidden />
         </Link>
       ) : null}
     </section>

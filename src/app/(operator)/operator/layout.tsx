@@ -2,6 +2,7 @@ import { Lock } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Brand } from "@/components/brand";
+import { ScrollReset } from "@/components/motion/scroll-reset";
 import { OperatorNav } from "@/components/operator/operator-nav";
 import { SignOutButton } from "@/components/sign-out-button";
 import { Button } from "@/components/ui/button";
@@ -46,6 +47,7 @@ export default async function OperatorLayout({ children }: { children: React.Rea
         </div>
       </header>
       <main className="container py-6">{children}</main>
+      <ScrollReset />
     </div>
   );
 }

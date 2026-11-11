@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Noto_Sans_Kannada } from "next/font/google";
 import { Toaster } from "sonner";
 import { I18nProvider } from "@/components/i18n-provider";
+import { PointerFx } from "@/components/motion/pointer-fx";
 import { currentLang } from "@/lib/session-lang";
 import "./globals.css";
 
@@ -24,7 +25,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang={lang} className={`${inter.variable} ${kannada.variable}`}>
       <body className="min-h-dvh font-sans">
+        <noscript>
+          <style>{"[data-reveal]{opacity:1!important;transform:none!important}"}</style>
+        </noscript>
         <I18nProvider lang={lang}>{children}</I18nProvider>
+        <PointerFx />
         <Toaster richColors position="top-center" closeButton />
       </body>
     </html>

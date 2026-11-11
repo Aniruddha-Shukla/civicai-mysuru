@@ -81,7 +81,7 @@ export default async function DashboardPage() {
         </Link>
       ) : null}
 
-      <NextPickup day={pickups[0] ?? null} lang={lang} />
+      <NextPickup day={pickups[0] ?? null} lang={lang} now={now} />
 
       {strip.length > 0 ? (
         <section aria-labelledby="strip-heading" className="space-y-2">
@@ -96,15 +96,15 @@ export default async function DashboardPage() {
       ) : null}
 
       <section className="grid grid-cols-2 gap-3">
-        <Link href="/ask" className="group rounded-3xl border bg-card p-4 shadow-soft transition-all hover:-translate-y-0.5 hover:border-primary/40">
-          <span className="mb-3 flex size-12 items-center justify-center rounded-2xl bg-violet-100 text-violet-700 transition-transform group-hover:scale-110">
+        <Link href="/ask" data-spotlight className="spotlight group rounded-3xl border bg-card p-4 shadow-soft transition-transform duration-300 hover:-translate-y-1 active:scale-[0.98]">
+          <span className="mb-3 flex size-12 items-center justify-center rounded-2xl bg-violet-100 text-violet-700 transition-transform duration-500 group-hover:-rotate-6 group-hover:scale-110">
             <MessageCircleQuestionMark className="size-6" aria-hidden />
           </span>
           <span className="block font-bold">{t("home.askTitle")}</span>
           <span className="block text-xs text-muted-foreground">{t("home.askBody")}</span>
         </Link>
-        <Link href="/report" className="group rounded-3xl border bg-card p-4 shadow-soft transition-all hover:-translate-y-0.5 hover:border-primary/40">
-          <span className="mb-3 flex size-12 items-center justify-center rounded-2xl bg-rose-100 text-rose-700 transition-transform group-hover:scale-110">
+        <Link href="/report" data-spotlight className="spotlight group rounded-3xl border bg-card p-4 shadow-soft transition-transform duration-300 hover:-translate-y-1 active:scale-[0.98]">
+          <span className="mb-3 flex size-12 items-center justify-center rounded-2xl bg-rose-100 text-rose-700 transition-transform duration-500 group-hover:rotate-6 group-hover:scale-110">
             <Megaphone className="size-6" aria-hidden />
           </span>
           <span className="block font-bold">{t("home.reportTitle")}</span>
@@ -119,9 +119,9 @@ export default async function DashboardPage() {
         {view.events.length === 0 ? (
           <EmptyState icon={ShieldCheck} title={t("home.allGood")} body={t("home.allGoodBody")} />
         ) : (
-          view.events.map((event) => (
+          view.events.map((event, i) => (
+            <div key={event.id} data-reveal style={{ "--i": i } as React.CSSProperties}>
             <EventCard
-              key={event.id}
               id={`notice-${event.id}`}
               lang={lang}
               serviceName={event.service.name}
@@ -135,6 +135,7 @@ export default async function DashboardPage() {
               alternative={event.alternative}
               hasConflict={event.hasConflict}
             />
+            </div>
           ))
         )}
       </section>
@@ -146,9 +147,9 @@ export default async function DashboardPage() {
         {view.services.length === 0 ? (
           <EmptyState icon={CalendarDays} title={t("dashboard.noServices")} />
         ) : (
-          <ul className="divide-y rounded-3xl border bg-card shadow-soft">
+          <ul data-reveal className="divide-y overflow-hidden rounded-3xl border bg-card shadow-soft">
             {view.services.map((service) => (
-              <li key={service.id} className="flex items-center gap-3 p-4">
+              <li key={service.id} className="flex items-center gap-3 p-4 transition-colors hover:bg-accent/50">
                 <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-secondary text-primary">
                   <CalendarDays className="size-5" aria-hidden />
                 </span>

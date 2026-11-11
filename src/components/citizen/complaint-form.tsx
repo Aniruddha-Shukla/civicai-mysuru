@@ -32,11 +32,18 @@ const CATEGORIES: { key: string; label: TKey; text?: TKey; Icon: typeof Truck; t
   { key: "other", label: "report.cat.other", Icon: PencilLine, tone: "bg-violet-100 text-violet-700" },
 ];
 
-function Step({ n, title, children }: { n: number; title: string; children: React.ReactNode }) {
+function Step({ n, title, done, children }: { n: number; title: string; done: boolean; children: React.ReactNode }) {
   return (
     <section className="space-y-3">
       <h2 className="flex items-center gap-2 text-base font-bold">
-        <span className="flex size-7 items-center justify-center rounded-full bg-primary text-sm text-primary-foreground">{n}</span>
+        <span
+          className={cn(
+            "flex size-7 items-center justify-center rounded-full text-sm transition-colors duration-300",
+            done ? "bg-emerald-500 text-white" : "bg-primary text-primary-foreground",
+          )}
+        >
+          {done ? <Check key="done" className="size-4 animate-in zoom-in-50 spin-in-12 duration-300" aria-hidden /> : n}
+        </span>
         {title}
       </h2>
       {children}
@@ -148,10 +155,22 @@ export function ComplaintForm({
   );
 
   const relevantNotices = notices.filter((n) => n.serviceId === serviceId);
+  const done = [category !== null || description.trim().length >= 10, description.trim().length >= 10, photo !== null || location !== null];
+  const progress = done.filter(Boolean).length;
 
   return (
     <form noValidate onSubmit={onSubmit} className="space-y-7">
-      <Step n={1} title={t("report.step1")}>
+      {/* How far along the report is: fills as each step is done */}
+      <div className="sticky top-[6.75rem] z-20 -mx-1 rounded-full bg-background/80 p-1 backdrop-blur" aria-hidden>
+        <div className="h-2 overflow-hidden rounded-full bg-secondary">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-violet-500 to-emerald-500 transition-[width] duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)]"
+            style={{ width: `${Math.max(6, (progress / 3) * 100)}%` }}
+          />
+        </div>
+      </div>
+
+      <Step n={1} title={t("report.step1")} done={done[0]!}>
         <div role="radiogroup" aria-label={t("report.step1")} className="grid grid-cols-2 gap-3">
           {CATEGORIES.map((c) => {
             const active = category === c.key;
@@ -163,16 +182,16 @@ export function ComplaintForm({
                 aria-checked={active}
                 onClick={() => chooseCategory(c.key)}
                 className={cn(
-                  "relative flex min-h-[6.5rem] flex-col items-start justify-between gap-2 rounded-2xl border-2 bg-card p-3 text-left shadow-soft text-sm font-semibold transition-all hover:-translate-y-0.5 hover:shadow-md",
+                  "group relative flex min-h-[6.5rem] flex-col items-start justify-between gap-2 rounded-2xl border-2 bg-card p-3 text-left text-sm font-semibold shadow-soft transition-all duration-300 hover:-translate-y-1 hover:shadow-lg active:scale-[0.97]",
                   active ? "border-primary shadow-md ring-2 ring-primary/20" : "border-border",
                 )}
               >
-                <span className={cn("flex size-10 items-center justify-center rounded-xl", c.tone)}>
+                <span className={cn("flex size-10 items-center justify-center rounded-xl transition-transform duration-500 group-hover:-rotate-6 group-hover:scale-110", c.tone, active && "motion-safe:animate-wiggle")}>
                   <c.Icon className="size-5" aria-hidden />
                 </span>
                 {t(c.label)}
                 {active ? (
-                  <span className="absolute right-2 top-2 flex size-6 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                  <span className="absolute right-2 top-2 flex size-6 items-center justify-center rounded-full bg-primary text-primary-foreground animate-in zoom-in-50 duration-200">
                     <Check className="size-4" aria-hidden />
                   </span>
                 ) : null}
@@ -182,7 +201,7 @@ export function ComplaintForm({
         </div>
       </Step>
 
-      <Step n={2} title={t("report.step2")}>
+      <Step n={2} title={t("report.step2")} done={done[1]!}>
         <div className="space-y-1.5">
           <Textarea
             id="description"
@@ -243,9 +262,9 @@ export function ComplaintForm({
         ) : null}
       </Step>
 
-      <Step n={3} title={t("report.step3")}>
+      <Step n={3} title={t("report.step3")} done={done[2]!}>
         {photo ? (
-          <div className="flex items-center justify-between gap-2 rounded-2xl border-2 border-primary/40 bg-secondary p-3 text-sm">
+          <div className="flex items-center justify-between gap-2 rounded-2xl border-2 border-primary/40 bg-secondary p-3 text-sm animate-in fade-in-0 zoom-in-95">
             <span className="flex min-w-0 items-center gap-2">
               <Camera className="size-5 shrink-0 text-primary" aria-hidden />
               <span className="truncate font-medium">{photo.name}</span>
@@ -255,8 +274,8 @@ export function ComplaintForm({
             </Button>
           </div>
         ) : (
-          <label className="flex cursor-pointer flex-col items-center gap-2 rounded-2xl border-2 border-dashed border-primary/40 bg-secondary/40 p-6 text-center transition-colors hover:bg-secondary">
-            <span className="flex size-12 items-center justify-center rounded-full bg-primary text-primary-foreground">
+          <label className="group flex cursor-pointer flex-col items-center gap-2 rounded-2xl border-2 border-dashed border-primary/40 bg-secondary/40 p-6 text-center transition-all hover:border-primary hover:bg-secondary focus-within:ring-2 focus-within:ring-ring">
+            <span className="flex size-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 transition-transform duration-300 group-hover:scale-110">
               <Camera className="size-6" aria-hidden />
             </span>
             <span className="font-semibold text-primary">{t("report.addPhoto")}</span>

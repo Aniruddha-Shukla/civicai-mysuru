@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildPickupDays } from "@/lib/pickups";
+import { buildPickupDays, daysUntil } from "@/lib/pickups";
 import { istMidnight } from "@/lib/time";
 
 const NOW = new Date("2026-11-06T06:00:00Z"); // Friday 6 Nov 2026, IST
@@ -44,5 +44,16 @@ describe("buildPickupDays", () => {
       "2026-11-19 normal",
     ]);
     expect(days.find((d) => d.status === "replacement")?.originalDate).toEqual(istMidnight("2026-11-09"));
+  });
+});
+
+describe("daysUntil", () => {
+  it("counts IST calendar days, not 24-hour periods", () => {
+    expect(daysUntil(NOW, NOW)).toBe(0);
+    // 23:30 IST on Friday is still "today"
+    expect(daysUntil(NOW, new Date("2026-11-06T18:00:00Z"))).toBe(0);
+    // 00:30 IST on Saturday is "tomorrow", only a few hours later
+    expect(daysUntil(NOW, new Date("2026-11-06T19:00:00Z"))).toBe(1);
+    expect(daysUntil(NOW, istMidnight("2026-11-09"))).toBe(3);
   });
 });
