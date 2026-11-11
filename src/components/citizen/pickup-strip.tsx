@@ -103,7 +103,7 @@ export function PickupStrip({ days }: { days: StripDay[] }) {
                 aria-label={`${d.weekday} ${d.day} ${d.month}: ${t(`home.status.${d.status}`)}`}
                 onClick={() => select(i, false)}
                 className={cn(
-                  "flex min-w-[4.75rem] snap-start flex-col items-center gap-0.5 rounded-2xl border-2 px-2 py-2.5 transition-all duration-300",
+                  "flex min-w-[4.75rem] shrink-0 snap-start flex-col items-center gap-0.5 rounded-2xl border-2 px-2 py-2.5 transition-all duration-300 sm:min-w-[5.5rem] sm:flex-1 sm:py-3",
                   l.tile,
                   active ? "-translate-y-1 scale-[1.04] border-current shadow-lg" : "opacity-90 hover:-translate-y-0.5 hover:opacity-100 hover:shadow-md",
                 )}

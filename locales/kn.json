@@ -295,7 +295,8 @@
     "tomorrow": "ನಾಳೆ",
     "inDays": "{count} ದಿನಗಳಲ್ಲಿ",
     "scrollLeft": "ಹಿಂದಿನ ದಿನಗಳು",
-    "scrollRight": "ಮುಂದಿನ ದಿನಗಳು"
+    "scrollRight": "ಮುಂದಿನ ದಿನಗಳು",
+    "legend": "ಬಣ್ಣಗಳ ಅರ್ಥ"
   },
   "greeting": {
     "hello": "ನಮಸ್ಕಾರ!",

@@ -44,7 +44,7 @@ export default async function CitizenAppLayout({ children }: { children: React.R
           </Link>
         </div>
       </header>
-      <main className="container max-w-3xl py-5">{children}</main>
+      <main className="container max-w-6xl py-5 lg:py-8">{children}</main>
       <CitizenNav unread={unread} variant="bottom" />
       <ScrollReset />
     </div>

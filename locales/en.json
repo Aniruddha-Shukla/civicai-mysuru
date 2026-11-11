@@ -299,7 +299,8 @@
     "tomorrow": "Tomorrow",
     "inDays": "In {count} days",
     "scrollLeft": "Earlier days",
-    "scrollRight": "Later days"
+    "scrollRight": "Later days",
+    "legend": "What the colours mean"
   },
   "greeting": {
     "hello": "Hello!",
