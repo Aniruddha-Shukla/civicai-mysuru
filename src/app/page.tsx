@@ -31,7 +31,13 @@ function previewStates(lang: Lang, t: TFunction, now: Date): PreviewState[] {
   const time = formatTime12h("07:00");
 
   return [
-    { key: "normal", label: t("landing.previewNormal"), pill: t("home.onSchedule"), title: formatDayFor(lang, monday), sub: `${time} · ${t("home.keepReady", { time })}` },
+    {
+      key: "normal",
+      label: t("landing.previewNormal"),
+      pill: t("home.onSchedule"),
+      title: formatDayFor(lang, monday),
+      sub: `${time} · ${t("home.keepReady", { time })}`,
+    },
     {
       key: "moved",
       label: t("landing.previewMoved"),
@@ -100,50 +106,57 @@ export default async function LandingPage() {
         <div data-scroll="page" className="page-progress h-full bg-gradient-to-r from-lime-400 via-emerald-500 to-teal-500" />
       </div>
 
-      <div data-scroll="exit" data-parallax className="bg-hero grain relative overflow-hidden rounded-b-[2.5rem] text-white shadow-xl shadow-primary/20">
-        {/* slow drifting colour blobs behind the hero */}
-        <div className="pointer-events-none absolute inset-0" aria-hidden>
-          <div className="absolute -left-24 top-10 size-80 rounded-full bg-lime-400/12 blur-3xl motion-safe:animate-aurora" />
-          <div className="absolute -right-20 bottom-0 size-96 rounded-full bg-teal-300/12 blur-3xl motion-safe:animate-aurora [animation-delay:-9s]" />
-        </div>
-        <EcoFloaters className="opacity-80" />
-
-        <header className="container relative mt-3 flex h-16 items-center justify-between gap-2 rounded-full border border-white/15 bg-white/5 backdrop-blur-md">
+      {/* Floating dark dock, the same as inside the app */}
+      <header className="sticky top-0 z-40 px-3 pt-3">
+        <div className="container flex h-16 items-center justify-between gap-2 rounded-[1.75rem] border border-white/10 bg-emerald-950/90 text-white shadow-xl shadow-emerald-950/20 backdrop-blur-xl">
           <Brand light />
-          <div className="flex items-center gap-1 [&_button]:text-white [&_button:hover]:bg-white/15">
+          <div className="flex items-center gap-1.5 [&_button:hover]:bg-white/10 [&_button:hover]:text-white [&_button]:text-white/80">
             <LanguageToggle signedIn={Boolean(profile)} />
-            {home ? null : (
-              <Button asChild variant="ghost" size="sm" className="border border-white/40 text-white hover:bg-white/15 hover:text-white">
-                <Link href="/login">{t("auth.signIn")}</Link>
-              </Button>
-            )}
+            <Button asChild size="sm" className="bg-lime-300 text-emerald-950 shadow-lg shadow-lime-300/20 hover:bg-lime-200">
+              <Link href={home ?? "/login"}>{home ? t("landing.getStarted") : t("auth.signIn")}</Link>
+            </Button>
           </div>
-        </header>
+        </div>
+      </header>
 
-        <section className="container relative grid max-w-5xl items-center gap-4 pb-10 pt-4 md:min-h-[calc(100dvh-9rem)] md:grid-cols-2 md:gap-10 md:pb-14">
-          <div className="hero-exit-scene text-center md:order-2">
-            <CityScene id="hero-scene" className="mx-auto max-w-[17rem] drop-shadow-2xl sm:max-w-sm md:max-w-md" />
-          </div>
-          <div className="hero-exit-text text-center md:order-1 md:text-left">
-            <h1 className="text-3xl font-extrabold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
-              <SplitWords text={t("landing.headline")} />
-            </h1>
-            <p className="mx-auto mt-4 max-w-xl text-base text-white/85 animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both delay-500 duration-700 sm:text-lg md:mx-0">
-              {t("landing.body")}
-            </p>
-            <div className="mx-auto mt-8 max-w-xl animate-in fade-in-0 slide-in-from-bottom-3 fill-mode-both delay-700 duration-700 md:mx-0">
-              {showDemo ? <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-white/70">{t("landing.tryIt")}</p> : null}
-              {demoOrStart}
-            </div>
-          </div>
-        </section>
-
-        <a
-          href="#principle"
-          className="relative mx-auto mb-6 hidden w-fit items-center gap-2 rounded-full border border-white/30 px-4 py-2 text-xs font-semibold text-white/85 transition-colors hover:bg-white/10 md:flex"
+      <div className="px-3 pt-3">
+        <div
+          data-scroll="exit"
+          data-parallax
+          className="bg-hero grain relative overflow-hidden rounded-[2.5rem] text-white shadow-xl shadow-primary/20"
         >
-          {t("landing.scroll")} <ArrowDown className="size-4 motion-safe:animate-bounce" aria-hidden />
-        </a>
+          {/* slow drifting colour blobs behind the hero */}
+          <div className="pointer-events-none absolute inset-0" aria-hidden>
+            <div className="absolute -left-24 top-10 size-80 rounded-full bg-lime-400/12 blur-3xl motion-safe:animate-aurora" />
+            <div className="absolute -right-20 bottom-0 size-96 rounded-full bg-teal-300/12 blur-3xl motion-safe:animate-aurora [animation-delay:-9s]" />
+          </div>
+          <EcoFloaters className="opacity-80" />
+
+          <section className="container relative grid max-w-5xl items-center gap-4 pb-10 pt-8 md:min-h-[calc(100dvh-10rem)] md:grid-cols-2 md:gap-10 md:pb-14">
+            <div className="hero-exit-scene text-center md:order-2">
+              <CityScene id="hero-scene" className="mx-auto max-w-[17rem] drop-shadow-2xl sm:max-w-sm md:max-w-md" />
+            </div>
+            <div className="hero-exit-text text-center md:order-1 md:text-left">
+              <h1 className="text-3xl font-extrabold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
+                <SplitWords text={t("landing.headline")} />
+              </h1>
+              <p className="mx-auto mt-4 max-w-xl text-base text-white/85 animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both delay-500 duration-700 sm:text-lg md:mx-0">
+                {t("landing.body")}
+              </p>
+              <div className="mx-auto mt-8 max-w-xl animate-in fade-in-0 slide-in-from-bottom-3 fill-mode-both delay-700 duration-700 md:mx-0">
+                {showDemo ? <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-white/70">{t("landing.tryIt")}</p> : null}
+                {demoOrStart}
+              </div>
+            </div>
+          </section>
+
+          <a
+            href="#principle"
+            className="relative mx-auto mb-6 hidden w-fit items-center gap-2 rounded-full border border-white/30 px-4 py-2 text-xs font-semibold text-white/85 transition-colors hover:bg-white/10 md:flex"
+          >
+            {t("landing.scroll")} <ArrowDown className="size-4 motion-safe:animate-bounce" aria-hidden />
+          </a>
+        </div>
       </div>
 
       <div className="mt-8">
@@ -164,9 +177,15 @@ export default async function LandingPage() {
           <ol className="grid gap-5 sm:grid-cols-3">
             {steps.map((step, i) => (
               <li key={step.title} data-scroll="enter" className="fly-3d" style={{ "--i": i } as React.CSSProperties}>
-                <div data-tilt="10" data-spotlight className="spotlight group relative h-full overflow-hidden rounded-3xl border bg-card p-6 shadow-soft">
+                <div
+                  data-tilt="10"
+                  data-spotlight
+                  className="spotlight group relative h-full overflow-hidden rounded-3xl border bg-card p-6 shadow-soft"
+                >
                   <span className="glare" aria-hidden />
-                  <span className="absolute right-5 top-3 text-6xl font-black text-primary/10 transition-colors group-hover:text-primary/25">{i + 1}</span>
+                  <span className="absolute right-5 top-3 text-6xl font-black text-primary/10 transition-colors group-hover:text-primary/25">
+                    {i + 1}
+                  </span>
                   <span
                     className={`mb-4 flex size-14 items-center justify-center rounded-2xl transition-transform duration-500 group-hover:-rotate-6 group-hover:scale-110 ${step.tone}`}
                   >

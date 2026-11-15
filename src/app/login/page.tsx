@@ -1,3 +1,4 @@
+import { BadgeCheck, Languages, Megaphone } from "lucide-react";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { AuthCard } from "@/components/auth-card";
@@ -5,6 +6,7 @@ import { Brand } from "@/components/brand";
 import { CityScene } from "@/components/city-scene";
 import { LanguageToggle } from "@/components/language-toggle";
 import { EcoFloaters, SweepLine } from "@/components/motion/eco";
+import { HeroChip } from "@/components/page-hero";
 import { getSessionProfile } from "@/lib/auth";
 import { demoEnabled } from "@/lib/demo/accounts";
 import { greetingKey } from "@/lib/greeting";
@@ -22,44 +24,52 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   const t = getT(await currentLang());
 
   return (
-    <div data-parallax className="bg-hero grain relative flex min-h-dvh items-center justify-center overflow-hidden p-3 sm:p-8">
-      {/* drifting colour and floating 3D eco objects */}
-      <div className="pointer-events-none absolute inset-0" aria-hidden>
-        <div className="absolute -left-32 top-0 size-[28rem] rounded-full bg-lime-300/12 blur-3xl motion-safe:animate-aurora" />
-        <div className="absolute -bottom-24 right-0 size-[26rem] rounded-full bg-teal-300/12 blur-3xl motion-safe:animate-aurora [animation-delay:-9s]" />
-      </div>
-      <EcoFloaters />
+    <div className="min-h-dvh pb-8">
+      {/* Floating dark dock, the same as inside the app */}
+      <header className="sticky top-0 z-30 px-3 pt-3">
+        <div className="container flex h-16 items-center justify-between gap-2 rounded-[1.75rem] border border-white/10 bg-emerald-950/90 text-white shadow-xl shadow-emerald-950/20 backdrop-blur-xl">
+          <Brand light />
+          <div className="[&_button:hover]:bg-white/10 [&_button:hover]:text-white [&_button]:text-white/80">
+            <LanguageToggle signedIn={false} />
+          </div>
+        </div>
+      </header>
 
-      {/* The card swings in from an angle, then tilts toward the mouse; the illustration floats in front of it. */}
-      <div className="card-in-3d relative w-full max-w-5xl">
-        <div
-          data-tilt="5"
-          className="relative grid rounded-[2rem] bg-emerald-950/40 shadow-2xl shadow-black/40 ring-1 ring-white/15 [transform-style:preserve-3d] md:grid-cols-[1.1fr_1fr]"
-        >
-          <span className="glare z-10" aria-hidden />
+      <main className="container grid max-w-6xl gap-5 pt-5 md:grid-cols-[1.1fr_1fr] md:items-stretch md:gap-6 md:pt-8">
+        {/* Picture panel: swings in, tilts toward the mouse. On phones it sits under the form, so signing in comes first. */}
+        <section className="card-in-3d order-2 md:order-1">
+          <div
+            data-tilt="5"
+            data-parallax
+            className="bg-hero grain relative flex h-full flex-col gap-4 overflow-hidden rounded-[2rem] p-6 text-white shadow-xl shadow-primary/20 sm:p-8"
+          >
+            <span className="glare z-10" aria-hidden />
+            <div className="pointer-events-none absolute -left-24 top-0 size-80 rounded-full bg-lime-300/10 blur-3xl" aria-hidden />
+            <EcoFloaters className="opacity-40" />
 
-          {/* Picture side */}
-          <aside className="flex flex-col gap-4 p-6 text-white [transform-style:preserve-3d] sm:p-8">
-            <div className="flex items-center justify-between gap-2" style={{ transform: "translateZ(30px)" }}>
-              <Brand light />
-              <div className="md:hidden [&_button:hover]:bg-white/15 [&_button]:text-white">
-                <LanguageToggle signedIn={false} />
-              </div>
+            <p className="relative text-[11px] font-semibold uppercase tracking-[0.2em] text-lime-300">{t("app.name")}</p>
+            <h2 className="relative max-w-md text-2xl font-extrabold leading-tight tracking-tight sm:text-3xl">{t("landing.headline")}</h2>
+
+            <div className="relative md:my-auto">
+              <CityScene id="login-scene" className="mx-auto max-w-[14rem] drop-shadow-2xl sm:max-w-xs md:max-w-sm" />
             </div>
-            <div className="md:my-auto" style={{ transform: "translateZ(80px)" }}>
-              <CityScene id="login-scene" className="mx-auto max-w-[15rem] drop-shadow-2xl sm:max-w-xs md:max-w-md" />
-            </div>
-            <div className="hidden md:block" style={{ transform: "translateZ(40px)" }}>
+
+            <div className="relative hidden md:block">
               <SweepLine className="text-white" />
-              <p className="mt-2 text-center text-sm text-white/85">{t("auth.sidePitch")}</p>
             </div>
-          </aside>
+            <div className="relative flex flex-wrap gap-2">
+              <HeroChip icon={BadgeCheck} strong>
+                {t("landing.m1")}
+              </HeroChip>
+              <HeroChip icon={Languages}>{t("landing.m2")}</HeroChip>
+              <HeroChip icon={Megaphone}>{t("landing.m5")}</HeroChip>
+            </div>
+          </div>
+        </section>
 
-          {/* Form side */}
-          <main className="rounded-t-[2rem] bg-card p-6 sm:p-10 md:rounded-[2rem]" style={{ transform: "translateZ(20px)" }}>
-            <div className="mb-6 hidden justify-end md:flex">
-              <LanguageToggle signedIn={false} />
-            </div>
+        {/* Form card */}
+        <section className="card-in-3d order-1 [animation-delay:150ms] md:order-2">
+          <div className="h-full rounded-[2rem] border bg-card p-6 shadow-soft sm:p-10">
             <p className="text-2xl font-semibold text-primary">{t("greeting.hello")}</p>
             <h1 className="mb-6 text-3xl font-extrabold tracking-tight">{t(greetingKey(new Date()))}</h1>
             <AuthCard
@@ -68,9 +78,9 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
               configured={isSupabaseConfigured()}
               demoLogin={isSupabaseConfigured() && demoEnabled()}
             />
-          </main>
-        </div>
-      </div>
+          </div>
+        </section>
+      </main>
     </div>
   );
 }
