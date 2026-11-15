@@ -1,8 +1,8 @@
-import { ScrollText } from "lucide-react";
+import { Lock, ScrollText } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
-import { PageHeader } from "@/components/page-header";
+import { HeroChip, PageHero } from "@/components/page-hero";
 import { Card, CardContent } from "@/components/ui/card";
 import { prisma } from "@/lib/db";
 import { requireOperatorPage } from "@/lib/operator-guard";
@@ -40,10 +40,27 @@ export default async function AuditLogPage({ searchParams }: { searchParams: Pro
 
   return (
     <div className="space-y-4">
-      <PageHeader title="Audit log" subtitle="Read-only record of verifications, withdrawals, AI-firewall rejections and other actions." />
+      <PageHero
+        icon={ScrollText}
+        kicker="Audit log"
+        title="Audit log"
+        subtitle="Read-only record of verifications, withdrawals, AI-firewall rejections and other actions."
+      >
+        <HeroChip icon={ScrollText} strong>
+          {total} entr{total === 1 ? "y" : "ies"}
+        </HeroChip>
+        <HeroChip icon={Lock}>Read-only: entries cannot be edited or deleted</HeroChip>
+      </PageHero>
       <nav className="flex flex-wrap gap-2" aria-label="Filter">
         {FILTERS.map((f) => (
-          <Link key={f.key} href={f.key ? `?filter=${f.key}` : "?"} className={cn("rounded-full border px-3 py-1 text-sm", filter === f.key && "border-primary bg-secondary text-primary")}>
+          <Link
+            key={f.key}
+            href={f.key ? `?filter=${f.key}` : "?"}
+            className={cn(
+              "rounded-full border px-4 py-1.5 text-sm font-semibold transition-colors",
+              filter === f.key ? "border-transparent bg-primary text-primary-foreground shadow-md shadow-primary/20" : "bg-card hover:bg-accent",
+            )}
+          >
             {f.label}
           </Link>
         ))}
@@ -55,7 +72,7 @@ export default async function AuditLogPage({ searchParams }: { searchParams: Pro
           <CardContent className="p-0">
             <ul className="divide-y">
               {entries.map((e) => (
-                <li key={e.id} className="grid gap-1 p-3 text-sm sm:grid-cols-[200px,1fr]">
+                <li key={e.id} className="grid gap-1 p-4 text-sm transition-colors hover:bg-accent/40 sm:grid-cols-[220px,1fr]">
                   <div>
                     <p className={cn("font-mono text-xs font-semibold", e.action === "ai.guard_rejected" && "text-destructive")}>{e.action}</p>
                     <p className="text-xs text-muted-foreground">{formatIstDateTime(e.createdAt)}</p>

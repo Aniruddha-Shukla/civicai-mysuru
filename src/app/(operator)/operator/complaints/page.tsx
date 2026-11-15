@@ -1,10 +1,10 @@
-import { ClipboardList, ImageIcon, MapPin } from "lucide-react";
+import { CircleCheck, ClipboardList, Clock, ImageIcon, MapPin, UserRound } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ComplaintStatusBadge } from "@/components/complaint-status-badge";
 import { EmptyState } from "@/components/empty-state";
 import { ComplaintTriage } from "@/components/operator/complaint-triage";
-import { PageHeader } from "@/components/page-header";
+import { HeroChip, PageHero } from "@/components/page-hero";
 import { Card, CardContent } from "@/components/ui/card";
 import { COMPLAINT_STATUSES } from "@/lib/constants";
 import { prisma } from "@/lib/db";
@@ -37,13 +37,37 @@ export default async function OperatorComplaintsPage({ searchParams }: { searchP
 
   return (
     <div className="space-y-4">
-      <PageHeader title="Complaint triage" subtitle="Oldest first. Notes you add are shown to the citizen on their tracker." />
+      <PageHero
+        icon={ClipboardList}
+        kicker="Complaints"
+        title="Complaint triage"
+        subtitle="Oldest first. Notes you add are shown to the citizen on their tracker."
+      >
+        <HeroChip icon={ClipboardList} strong={count("open") + count("in_review") > 0}>
+          {count("open") + count("in_review")} need action
+        </HeroChip>
+        <HeroChip icon={Clock}>{count("in_review")} in review</HeroChip>
+        <HeroChip icon={CircleCheck}>{count("resolved")} resolved</HeroChip>
+      </PageHero>
       <nav className="flex flex-wrap gap-2" aria-label="Filter by status">
-        <Link href="/operator/complaints" className={cn("rounded-full border px-3 py-1 text-sm", !status && "border-primary bg-secondary text-primary")}>
+        <Link
+          href="/operator/complaints"
+          className={cn(
+            "rounded-full border px-4 py-1.5 text-sm font-semibold transition-colors",
+            !status ? "border-transparent bg-primary text-primary-foreground shadow-md shadow-primary/20" : "bg-card hover:bg-accent",
+          )}
+        >
           Needs action ({count("open") + count("in_review")})
         </Link>
         {COMPLAINT_STATUSES.map((s) => (
-          <Link key={s} href={`/operator/complaints?status=${s}`} className={cn("rounded-full border px-3 py-1 text-sm", status === s && "border-primary bg-secondary text-primary")}>
+          <Link
+            key={s}
+            href={`/operator/complaints?status=${s}`}
+            className={cn(
+              "rounded-full border px-4 py-1.5 text-sm font-semibold transition-colors",
+              status === s ? "border-transparent bg-primary text-primary-foreground shadow-md shadow-primary/20" : "bg-card hover:bg-accent",
+            )}
+          >
             {LABELS[s]} ({count(s)})
           </Link>
         ))}
@@ -54,17 +78,25 @@ export default async function OperatorComplaintsPage({ searchParams }: { searchP
         <ul className="space-y-3">
           {complaints.map((c) => (
             <li key={c.id}>
-              <Card>
-                <CardContent className="space-y-3 p-4">
+              <Card className="overflow-hidden">
+                <div
+                  className={cn(
+                    "h-1.5",
+                    c.status === "open" ? "bg-sky-500" : c.status === "in_review" ? "bg-amber-500" : c.status === "resolved" ? "bg-emerald-500" : "bg-slate-400",
+                  )}
+                  aria-hidden
+                />
+                <CardContent className="space-y-3 p-4 sm:p-5">
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="text-sm font-semibold">
+                    <p className="font-bold">
                       {c.service.name} · {c.service.ward.name}
                     </p>
                     <ComplaintStatusBadge status={c.status} label={LABELS[c.status as keyof typeof LABELS] ?? c.status} />
                   </div>
-                  <p className="whitespace-pre-line text-sm">{c.description}</p>
+                  <p className="whitespace-pre-line rounded-2xl bg-muted/60 p-3 text-sm">{c.description}</p>
                   <p className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                    <span>
+                    <span className="inline-flex items-center gap-1">
+                      <UserRound className="size-3.5" aria-hidden />
                       {c.profile.name} · {formatIstDateTime(c.createdAt)}
                     </span>
                     {c.photoUrl ? (

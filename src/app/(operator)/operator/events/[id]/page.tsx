@@ -1,10 +1,11 @@
-import { ArrowLeft, History, TriangleAlert } from "lucide-react";
+import { ArrowLeft, BellRing, CalendarDays, FileText, History, MapPin, TriangleAlert } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { EventCard } from "@/components/event-card";
 import { ArrangementActions, ArrangementForm, VerifyEventActions, WithdrawEventDialog } from "@/components/operator/event-actions";
 import { EventStatusBadge } from "@/components/operator/event-status-badge";
+import { HeroChip, PageHero } from "@/components/page-hero";
 import { VerificationBadge } from "@/components/verification-badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -75,13 +76,24 @@ export default async function OperatorEventPage({ params }: { params: Promise<{ 
         </Link>
       </Button>
 
-      <div className="flex flex-wrap items-center gap-2">
-        <h1 className="mr-2 text-xl font-bold sm:text-2xl">
-          {event.service.name} · {formatIstDate(event.affectedDate)}
-        </h1>
-        <EventStatusBadge status={event.status} />
-        <VerificationBadge status={event.verificationStatus} />
-      </div>
+      <PageHero
+        icon={FileText}
+        kicker="Notice"
+        title={`${event.service.name} · ${formatIstDate(event.affectedDate)}`}
+        subtitle={event.reason}
+        aside={
+          <div className="flex flex-wrap gap-2 rounded-2xl bg-white p-2 shadow-lg">
+            <EventStatusBadge status={event.status} />
+            <VerificationBadge status={event.verificationStatus} />
+          </div>
+        }
+      >
+        <HeroChip icon={MapPin}>{event.ward.name}</HeroChip>
+        <HeroChip icon={CalendarDays}>{formatIstDate(event.affectedDate)}</HeroChip>
+        <HeroChip icon={BellRing} strong={notifiedCount > 0}>
+          {notifiedCount} alert(s) sent
+        </HeroChip>
+      </PageHero>
 
       {peers.length > 0 ? (
         <Alert variant="warning">

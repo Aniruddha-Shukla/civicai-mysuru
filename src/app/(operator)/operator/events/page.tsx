@@ -1,10 +1,10 @@
 import type { Prisma } from "@prisma/client";
-import { ChevronRight, Inbox, Plus } from "lucide-react";
+import { ChevronRight, Filter, Inbox, ListChecks, Plus, ShieldCheck } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { EventStatusBadge } from "@/components/operator/event-status-badge";
-import { PageHeader } from "@/components/page-header";
+import { HeroChip, PageHero } from "@/components/page-hero";
 import { VerificationBadge } from "@/components/verification-badge";
 import { Button } from "@/components/ui/button";
 import { NativeSelect } from "@/components/ui/select";
@@ -63,19 +63,27 @@ export default async function OperatorEventsPage({
 
   return (
     <div className="space-y-4">
-      <PageHeader
+      <PageHero
+        icon={ListChecks}
+        kicker="Notices"
         title="Civic event notices"
-        subtitle={`${total} notice(s)`}
-        actions={
-          <Button asChild>
+        subtitle="Every disruption notice, newest day first. Open one to verify it, add an alternative or withdraw it."
+        aside={
+          <Button asChild className="bg-lime-300 text-emerald-950 shadow-lg shadow-lime-300/20 hover:bg-lime-200">
             <Link href="/operator/events/new">
               <Plus aria-hidden /> New notice
             </Link>
           </Button>
         }
-      />
+      >
+        <HeroChip icon={ListChecks} strong>
+          {total} notice(s)
+        </HeroChip>
+        {status || verification || wardId ? <HeroChip icon={Filter}>Filtered</HeroChip> : null}
+        <HeroChip icon={ShieldCheck}>Citizens see verified notices only</HeroChip>
+      </PageHero>
 
-      <form className="grid gap-2 rounded-lg border bg-card p-3 sm:grid-cols-4" method="get">
+      <form className="grid gap-2 rounded-3xl border bg-card p-3 shadow-soft sm:grid-cols-4" method="get">
         <NativeSelect name="status" defaultValue={status ?? ""} aria-label="Status">
           <option value="">All statuses</option>
           {STATUSES.map((s) => (
@@ -113,7 +121,11 @@ export default async function OperatorEventsPage({
             const alt = deriveAlternativeStatus(e.arrangements);
             return (
               <li key={e.id}>
-                <Link href={`/operator/events/${e.id}`} className="flex items-center justify-between gap-3 rounded-lg border bg-card p-3 hover:bg-accent">
+                <Link
+                  href={`/operator/events/${e.id}`}
+                  data-spotlight
+                  className="spotlight group flex items-center justify-between gap-3 rounded-2xl border bg-card p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
+                >
                   <span className="min-w-0 space-y-1">
                     <span className="block text-sm font-semibold">
                       {formatIstDateShort(e.affectedDate)} · {e.service.name} · {e.ward.name}
@@ -128,7 +140,7 @@ export default async function OperatorEventsPage({
                       <VerificationBadge status={alt.status} />
                     </span>
                   </span>
-                  <ChevronRight className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+                  <ChevronRight className="size-5 shrink-0 text-primary transition-transform group-hover:translate-x-1" aria-hidden />
                 </Link>
               </li>
             );

@@ -1,6 +1,7 @@
+import { FilePlus, ShieldCheck, Sparkles } from "lucide-react";
 import type { Metadata } from "next";
 import { EventForm } from "@/components/operator/event-form";
-import { PageHeader } from "@/components/page-header";
+import { HeroChip, PageHero } from "@/components/page-hero";
 import { isAiConfigured } from "@/lib/ai/client";
 import { prisma } from "@/lib/db";
 import { requireOperatorPage } from "@/lib/operator-guard";
@@ -16,8 +17,20 @@ export default async function NewEventPage() {
   });
   return (
     <div>
-      <PageHeader title="New disruption notice" subtitle="Enter an official municipal notice, or paste its text for AI-assisted drafting." />
+      <PageHero
+        icon={FilePlus}
+        kicker="New notice"
+        title="New disruption notice"
+        subtitle="Enter an official municipal notice, or paste its text for AI-assisted drafting."
+      >
+        <HeroChip icon={ShieldCheck} strong>
+          Citizens are alerted only after you verify it
+        </HeroChip>
+        <HeroChip icon={Sparkles}>{isAiConfigured() ? "AI drafting available" : "Manual entry (AI off)"}</HeroChip>
+      </PageHero>
+      <div className="rounded-[2rem] border bg-card p-4 shadow-soft sm:p-6">
       <EventForm wards={wards} aiAvailable={isAiConfigured()} todayKey={istDateKey(new Date())} />
+      </div>
     </div>
   );
 }

@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { apiCall } from "@/lib/client-api";
 
-export function OperatorTools() {
+export function OperatorTools({ onDark = false }: { onDark?: boolean }) {
   const router = useRouter();
   const [syncing, startSync] = useTransition();
   const [resetting, startReset] = useTransition();
@@ -16,6 +16,7 @@ export function OperatorTools() {
     <div className="flex flex-col gap-2 sm:flex-row">
       <Button
         variant="outline"
+        className={onDark ? "border-0 bg-lime-300 text-emerald-950 hover:bg-lime-200" : undefined}
         disabled={syncing}
         onClick={() =>
           startSync(async () => {
@@ -34,6 +35,7 @@ export function OperatorTools() {
       </Button>
       <Button
         variant="ghost"
+        className={onDark ? "text-white ring-1 ring-white/25 hover:bg-white/10 hover:text-white" : undefined}
         disabled={resetting}
         onClick={() =>
           startReset(async () => {

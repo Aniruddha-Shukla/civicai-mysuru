@@ -1,9 +1,9 @@
-import { Archive, Bell, BellRing, ClipboardList, Hourglass, ShieldAlert, Sparkles, TriangleAlert } from "lucide-react";
+import { Archive, Bell, BellRing, CalendarDays, ChevronRight, ClipboardList, Hourglass, LayoutDashboard, ShieldAlert, Sparkles, TriangleAlert } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { OperatorTools } from "@/components/operator/operator-tools";
-import { PageHeader } from "@/components/page-header";
+import { HeroChip, PageHero } from "@/components/page-hero";
 import { VerificationBadge } from "@/components/verification-badge";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,12 +11,15 @@ import { isAiConfigured } from "@/lib/ai/client";
 import { findConflictGroups, isCurrent } from "@/lib/conflicts";
 import { prisma } from "@/lib/db";
 import { requireOperatorPage } from "@/lib/operator-guard";
-import { formatIstDateShort, formatIstDateTime } from "@/lib/time";
+import { greetingKey } from "@/lib/greeting";
+import { getT } from "@/lib/i18n";
+import { formatIstDate, formatIstDateShort, formatIstDateTime } from "@/lib/time";
+import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Operator overview" };
 
 export default async function OperatorOverviewPage() {
-  await requireOperatorPage();
+  const operator = await requireOperatorPage();
   const now = new Date();
   const [active, withdrawnPending, openComplaints, alerts24h, recentAudit] = await Promise.all([
     prisma.civicEvent.findMany({
@@ -38,15 +41,19 @@ export default async function OperatorOverviewPage() {
   const pendingFollowUps = current.filter((e) => e.verificationStatus === "VERIFIED" && e.version > e.notifiedVersion);
 
   const stats = [
-    { label: "Current notices", value: current.length, icon: Bell },
-    { label: "Awaiting verification", value: awaiting.length, icon: ShieldAlert },
-    { label: "Open complaints", value: openComplaints, icon: ClipboardList },
-    { label: "Alerts sent (24 h)", value: alerts24h, icon: BellRing },
+    { label: "Current notices", hint: "Live for citizens or awaiting checks", value: current.length, icon: Bell, tone: "bg-emerald-100 text-emerald-700", href: "/operator/events?status=ACTIVE" },
+    { label: "Awaiting verification", hint: "Citizens are not alerted yet", value: awaiting.length, icon: ShieldAlert, tone: "bg-amber-100 text-amber-700", href: "/operator/events?status=ACTIVE&verification=UNVERIFIED" },
+    { label: "Open complaints", hint: "Oldest first in the queue", value: openComplaints, icon: ClipboardList, tone: "bg-rose-100 text-rose-700", href: "/operator/complaints" },
+    { label: "Alerts sent (24 h)", hint: "Delivered to citizens", value: alerts24h, icon: BellRing, tone: "bg-teal-100 text-teal-700", href: "/operator/audit-log?filter=notification." },
   ];
+  const t = getT("en");
 
   const row = (e: (typeof active)[number], extra?: React.ReactNode) => (
     <li key={e.id}>
-      <Link href={`/operator/events/${e.id}`} className="flex flex-wrap items-center justify-between gap-2 rounded-md border bg-card p-3 text-sm hover:bg-accent">
+      <Link
+        href={`/operator/events/${e.id}`}
+        className="group flex flex-wrap items-center justify-between gap-2 rounded-2xl border bg-background p-3 text-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md"
+      >
         <span className="min-w-0">
           <span className="block font-medium">
             {formatIstDateShort(e.affectedDate)} · {e.service.name}
@@ -65,33 +72,44 @@ export default async function OperatorOverviewPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Operator overview" subtitle="Verify disruption notices, publish alternative arrangements and triage complaints." actions={<OperatorTools />} />
+      <PageHero
+        icon={LayoutDashboard}
+        kicker="Operator console"
+        title={`${t(greetingKey(now))}, ${operator.name.split(" ")[0] ?? operator.name}`}
+        subtitle="Verify disruption notices, publish alternative arrangements and triage complaints."
+        aside={<OperatorTools onDark />}
+      >
+        <HeroChip icon={CalendarDays}>{formatIstDate(now)}</HeroChip>
+        {awaiting.length > 0 ? (
+          <HeroChip icon={ShieldAlert} strong>
+            {awaiting.length} to verify
+          </HeroChip>
+        ) : null}
+        {conflicts.length > 0 ? <HeroChip icon={TriangleAlert}>{conflicts.length} conflict(s)</HeroChip> : null}
+        <HeroChip icon={Sparkles}>{isAiConfigured() ? "AI layer on" : "Template-only mode"}</HeroChip>
+      </PageHero>
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {stats.map((s) => (
-          <Card key={s.label}>
-            <CardContent className="flex items-center gap-3 p-4">
-              <s.icon className="size-5 text-primary" aria-hidden />
-              <div>
-                <p className="text-2xl font-bold leading-none">{s.value}</p>
-                <p className="mt-1 text-xs text-muted-foreground">{s.label}</p>
-              </div>
-            </CardContent>
-          </Card>
+        {stats.map((s, i) => (
+          <Link
+            key={s.label}
+            href={s.href}
+            data-spotlight
+            style={{ animationDelay: `${i * 80}ms` }}
+            className="spotlight group rounded-3xl border bg-card p-4 shadow-soft transition-transform duration-300 animate-in fade-in-0 slide-in-from-bottom-3 fill-mode-both duration-700 hover:-translate-y-1"
+          >
+            <span className="flex items-start justify-between">
+              <span className={cn("flex size-11 items-center justify-center rounded-2xl transition-transform duration-500 group-hover:-rotate-6 group-hover:scale-110", s.tone)}>
+                <s.icon className="size-5" aria-hidden />
+              </span>
+              <ChevronRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" aria-hidden />
+            </span>
+            <span className="mt-3 block text-3xl font-extrabold leading-none tracking-tight">{s.value}</span>
+            <span className="mt-1 block text-sm font-semibold">{s.label}</span>
+            <span className="block text-xs text-muted-foreground">{s.hint}</span>
+          </Link>
         ))}
       </div>
-
-      <Card>
-        <CardContent className="flex flex-wrap items-center gap-2 p-4 text-sm">
-          <Sparkles className="size-4 text-primary" aria-hidden />
-          AI layer:
-          {isAiConfigured() ? (
-            <Badge variant="verified">Enabled — translation, Q&A, extraction &amp; drafting assist</Badge>
-          ) : (
-            <Badge variant="unavailable">Template-only (degraded) mode — core alerts unaffected</Badge>
-          )}
-        </CardContent>
-      </Card>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card>

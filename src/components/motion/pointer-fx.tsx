@@ -6,49 +6,20 @@ import { useEffect } from "react";
  * One small, page-wide driver for every interactive effect, so pages can stay server components
  * and just opt in with data attributes:
  *
- *   data-reveal      fade/rise into view when scrolled to (stagger with style --i)
+ *   (data-reveal is pure CSS — scroll-driven animations in globals.css)
  *   data-spotlight   sets --mx/--my so the .spotlight glow follows the pointer
  *   data-magnetic    element leans toward the pointer while hovered
  *   data-tilt        3D tilt toward the pointer (+ --mx/--my for a .glare layer)
  *   data-parallax    sets --px/--py in [-1, 1] for .plx layers inside it
  *
  * Pointer effects run only with a fine pointer (mouse/trackpad); movement is skipped when the
- * person prefers reduced motion. Reveal content is always shown if motion is reduced.
+ * person prefers reduced motion.
  */
 export function PointerFx() {
   useEffect(() => {
     const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    // ── Scroll reveal ────────────────────────────────────────────────
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            entry.target.setAttribute("data-shown", "");
-            io.unobserve(entry.target);
-          }
-        }
-      },
-      { rootMargin: "0px 0px -8% 0px", threshold: 0.08 },
-    );
-    const scan = () => {
-      document.querySelectorAll("[data-reveal]:not([data-shown])").forEach((el) => {
-        if (reduceMotion) el.setAttribute("data-shown", "");
-        else io.observe(el);
-      });
-    };
-    scan();
-    let scanQueued = false;
-    const mo = new MutationObserver(() => {
-      if (scanQueued) return;
-      scanQueued = true;
-      requestAnimationFrame(() => {
-        scanQueued = false;
-        scan();
-      });
-    });
-    mo.observe(document.body, { childList: true, subtree: true });
 
     // ── Scroll-linked progress (--p from 0 to 1) for 3D scroll effects ──
     //   data-scroll="enter"  0 as the element comes up from the bottom → 1 once its top reaches ~30% of the screen
@@ -112,11 +83,7 @@ export function PointerFx() {
     };
 
     if (!finePointer) {
-      return () => {
-        io.disconnect();
-        mo.disconnect();
-        stopScroll();
-      };
+      return stopScroll;
     }
 
     // ── Pointer effects ──────────────────────────────────────────────
@@ -197,8 +164,6 @@ export function PointerFx() {
     document.addEventListener("pointermove", onMove, { passive: true });
     document.documentElement.addEventListener("pointerleave", onLeave);
     return () => {
-      io.disconnect();
-      mo.disconnect();
       stopScroll();
       cancelAnimationFrame(frame);
       document.removeEventListener("pointermove", onMove);
