@@ -6,6 +6,7 @@ import { CityScene } from "@/components/city-scene";
 import type { PreviewState } from "@/components/landing/alert-preview";
 import { ScrollStory } from "@/components/landing/scroll-story";
 import { LanguageToggle } from "@/components/language-toggle";
+import { EcoFloaters } from "@/components/motion/eco";
 import { Marquee } from "@/components/motion/marquee";
 import { ScrollWords } from "@/components/motion/scroll-words";
 import { SplitWords } from "@/components/motion/split-words";
@@ -60,9 +61,9 @@ export default async function LandingPage() {
   const showDemo = !profile && isSupabaseConfigured() && demoEnabled();
 
   const steps = [
-    { icon: ShieldCheck, tone: "bg-violet-100 text-violet-700", title: t("landing.step1Title"), body: t("landing.step1Body") },
-    { icon: BellRing, tone: "bg-indigo-100 text-indigo-700", title: t("landing.step2Title"), body: t("landing.step2Body") },
-    { icon: CalendarCheck, tone: "bg-fuchsia-100 text-fuchsia-700", title: t("landing.step3Title"), body: t("landing.step3Body") },
+    { icon: ShieldCheck, tone: "bg-emerald-100 text-emerald-700", title: t("landing.step1Title"), body: t("landing.step1Body") },
+    { icon: BellRing, tone: "bg-teal-100 text-teal-700", title: t("landing.step2Title"), body: t("landing.step2Body") },
+    { icon: CalendarCheck, tone: "bg-lime-100 text-lime-700", title: t("landing.step3Title"), body: t("landing.step3Body") },
   ];
 
   const primaryCta = (href: string) => (
@@ -70,7 +71,7 @@ export default async function LandingPage() {
       asChild
       size="lg"
       data-magnetic
-      className="group h-14 rounded-2xl bg-white px-8 text-base text-primary shadow-lg shadow-black/10 hover:bg-violet-50"
+      className="group h-14 rounded-2xl bg-lime-300 px-8 text-base text-emerald-950 shadow-lg shadow-lime-300/30 hover:bg-lime-200"
     >
       <Link href={href}>
         {t("landing.getStarted")} <ArrowRight className="transition-transform group-hover:translate-x-1" aria-hidden />
@@ -96,17 +97,18 @@ export default async function LandingPage() {
     <div className="min-h-dvh">
       {/* how far down the page you are */}
       <div className="fixed inset-x-0 top-0 z-50 h-1" aria-hidden>
-        <div data-scroll="page" className="page-progress h-full bg-gradient-to-r from-fuchsia-400 via-violet-500 to-indigo-500" />
+        <div data-scroll="page" className="page-progress h-full bg-gradient-to-r from-lime-400 via-emerald-500 to-teal-500" />
       </div>
 
-      <div data-scroll="exit" className="bg-hero grain relative overflow-hidden rounded-b-[2.5rem] text-white shadow-xl shadow-primary/20">
+      <div data-scroll="exit" data-parallax className="bg-hero grain relative overflow-hidden rounded-b-[2.5rem] text-white shadow-xl shadow-primary/20">
         {/* slow drifting colour blobs behind the hero */}
         <div className="pointer-events-none absolute inset-0" aria-hidden>
-          <div className="absolute -left-24 top-10 size-80 rounded-full bg-fuchsia-400/30 blur-3xl motion-safe:animate-aurora" />
-          <div className="absolute -right-20 bottom-0 size-96 rounded-full bg-indigo-300/25 blur-3xl motion-safe:animate-aurora [animation-delay:-9s]" />
+          <div className="absolute -left-24 top-10 size-80 rounded-full bg-lime-400/12 blur-3xl motion-safe:animate-aurora" />
+          <div className="absolute -right-20 bottom-0 size-96 rounded-full bg-teal-300/12 blur-3xl motion-safe:animate-aurora [animation-delay:-9s]" />
         </div>
+        <EcoFloaters className="opacity-80" />
 
-        <header className="container relative flex h-16 items-center justify-between gap-2">
+        <header className="container relative mt-3 flex h-16 items-center justify-between gap-2 rounded-full border border-white/15 bg-white/5 backdrop-blur-md">
           <Brand light />
           <div className="flex items-center gap-1 [&_button]:text-white [&_button:hover]:bg-white/15">
             <LanguageToggle signedIn={Boolean(profile)} />
@@ -120,9 +122,7 @@ export default async function LandingPage() {
 
         <section className="container relative grid max-w-5xl items-center gap-4 pb-10 pt-4 md:min-h-[calc(100dvh-9rem)] md:grid-cols-2 md:gap-10 md:pb-14">
           <div className="hero-exit-scene text-center md:order-2">
-            <div data-parallax>
-              <CityScene id="hero-scene" className="mx-auto max-w-[17rem] sm:max-w-sm md:max-w-md" />
-            </div>
+            <CityScene id="hero-scene" className="mx-auto max-w-[17rem] drop-shadow-2xl sm:max-w-sm md:max-w-md" />
           </div>
           <div className="hero-exit-text text-center md:order-1 md:text-left">
             <h1 className="text-3xl font-extrabold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
@@ -193,7 +193,7 @@ export default async function LandingPage() {
         <section data-scroll="enter" className="container max-w-5xl pb-20 pt-6">
           <div className="rise-3d bg-hero grain relative overflow-hidden rounded-[2.5rem] px-6 py-14 text-center text-white shadow-2xl shadow-primary/30 sm:px-12">
             <div className="pointer-events-none absolute inset-0" aria-hidden>
-              <div className="absolute -right-16 -top-16 size-72 rounded-full bg-fuchsia-400/30 blur-3xl motion-safe:animate-aurora" />
+              <div className="absolute -right-16 -top-16 size-72 rounded-full bg-lime-400/12 blur-3xl motion-safe:animate-aurora" />
             </div>
             <div className="relative mx-auto max-w-xl">
               <h2 className="text-3xl font-extrabold tracking-tight sm:text-5xl">{t("landing.ctaTitle")}</h2>

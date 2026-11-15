@@ -24,27 +24,28 @@ export default async function CitizenAppLayout({ children }: { children: React.R
   if (!ward) redirect("/onboarding");
 
   return (
-    <div className="min-h-dvh pb-24 md:pb-8">
-      <header className="sticky top-0 z-30 border-b border-primary/10 bg-card/90 backdrop-blur-md">
-        <div className="container flex h-16 items-center justify-between gap-2">
-          <Brand href="/dashboard" />
+    <div className="min-h-dvh pb-28 md:pb-10">
+      {/* Floating dark dock */}
+      <header className="sticky top-0 z-30 px-3 pt-3">
+        <div className="container flex h-16 items-center justify-between gap-2 rounded-[1.75rem] border border-white/10 bg-emerald-950/90 text-white shadow-xl shadow-emerald-950/20 backdrop-blur-xl">
+          <Brand href="/dashboard" light />
           <CitizenNav unread={unread} variant="top" />
-          <div className="flex items-center">
+          <div className="flex items-center [&_button:hover]:bg-white/10 [&_button:hover]:text-white [&_button]:text-white/80">
             <LanguageToggle signedIn />
             <SignOutButton label={t("nav.signOut")} />
           </div>
         </div>
-        <div className="container flex items-center gap-2 pb-2.5 text-xs">
-          <span className="flex min-w-0 items-center gap-1.5 rounded-full bg-secondary px-3 py-1 font-medium text-secondary-foreground">
-            <MapPin className="size-3.5 shrink-0 text-primary" aria-hidden />
-            <span className="truncate">{ward.name}</span>
-          </span>
-          <Link href="/onboarding" className="shrink-0 font-semibold text-primary underline-offset-2 hover:underline">
-            {t("dashboard.changeWard")}
-          </Link>
-        </div>
       </header>
-      <main className="container max-w-6xl py-5 lg:py-8">{children}</main>
+      <div className="container flex max-w-6xl items-center gap-2 pt-4 text-xs">
+        <span className="flex min-w-0 items-center gap-1.5 rounded-full border border-primary/15 bg-card px-3 py-1.5 font-semibold text-secondary-foreground shadow-sm">
+          <MapPin className="size-3.5 shrink-0 text-primary" aria-hidden />
+          <span className="truncate">{ward.name}</span>
+        </span>
+        <Link href="/onboarding" className="shrink-0 font-semibold text-primary underline-offset-2 hover:underline">
+          {t("dashboard.changeWard")}
+        </Link>
+      </div>
+      <main className="container max-w-6xl py-4 lg:py-6">{children}</main>
       <CitizenNav unread={unread} variant="bottom" />
       <ScrollReset />
     </div>

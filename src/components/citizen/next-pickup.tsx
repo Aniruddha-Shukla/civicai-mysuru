@@ -3,6 +3,7 @@ import Link from "next/link";
 import { formatDayFor, getT, type Lang } from "@/lib/i18n";
 import { daysUntil, type PickupDay } from "@/lib/pickups";
 import { formatTime12h } from "@/lib/time";
+import { TruckLane } from "@/components/motion/eco";
 import { cn } from "@/lib/utils";
 
 const STYLE = {
@@ -44,6 +45,7 @@ export function NextPickup({ day, lang, now }: { day: PickupDay | null; lang: La
       className={cn("relative overflow-hidden rounded-3xl p-5 text-white shadow-xl shadow-primary/25 sm:p-6", style.card)}
     >
       <span className="glare" aria-hidden />
+      <TruckLane className="bottom-1 text-white/25" />
       <div className="pointer-events-none absolute -right-8 -top-8 size-40 rounded-full bg-white/10" aria-hidden />
       <div className="relative flex items-center justify-between gap-3">
         <p className="text-sm font-medium opacity-90">{t("home.nextPickup")}</p>

@@ -62,8 +62,8 @@ export default async function DashboardPage() {
   const strip = pickups.map((d) => toStripDay(d, lang, t));
 
   const legend = [
-    { dot: "bg-violet-500", label: t("home.status.normal") },
-    { dot: "bg-indigo-500", label: t("home.status.replacement") },
+    { dot: "bg-emerald-500", label: t("home.status.normal") },
+    { dot: "bg-teal-500", label: t("home.status.replacement") },
     { dot: "bg-amber-500", label: t("home.status.moved") },
     { dot: "bg-rose-500", label: t("home.status.cancelled") },
   ];
@@ -116,7 +116,7 @@ export default async function DashboardPage() {
         <aside className="min-w-0 space-y-7 lg:sticky lg:top-32 lg:col-span-4 lg:self-start">
           <section className="grid grid-cols-2 gap-3 lg:grid-cols-1">
             <Link href="/ask" data-spotlight className={action}>
-              <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-violet-100 text-violet-700 transition-transform duration-500 group-hover:-rotate-6 group-hover:scale-110">
+              <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700 transition-transform duration-500 group-hover:-rotate-6 group-hover:scale-110">
                 <MessageCircleQuestionMark className="size-6" aria-hidden />
               </span>
               <span className="min-w-0 flex-1">

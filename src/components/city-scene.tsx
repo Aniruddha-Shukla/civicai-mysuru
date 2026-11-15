@@ -7,10 +7,19 @@ const depth = (d: number) => ({
 });
 
 /**
- * The CivicAI illustration: Mysuru at dusk — palace silhouette, hills, a twinkling sky
- * and a waste-collection truck driving along the road. Pure SVG, no image downloads.
+ * The CivicAI illustration: Mysuru at sunrise — palace silhouette, Chamundi hills, and a
+ * collection truck that drives along the road picking up the wheelie bins (green = wet, blue = dry). Pure SVG, no image downloads.
  * Motion only plays for people who have not asked their device to reduce motion.
  */
+/** Truck loop is 10s; each bin's animation is shifted so it is "collected" exactly when the truck reaches it. */
+const LOOP = 10;
+const binDelay = (x: number) => `${((x + 12 - 420 * 0.5) / 420) * LOOP - LOOP}s`;
+const BINS = [
+  { x: 128, color: "#22c55e", lid: "#15803d", delay: binDelay(128) },
+  { x: 206, color: "#3b82f6", lid: "#1d4ed8", delay: binDelay(206) },
+  { x: 280, color: "#22c55e", lid: "#15803d", delay: binDelay(280) },
+];
+
 export function CityScene({ className, id = "scene" }: { className?: string; id?: string }) {
   const sky = `${id}-sky`;
   const sun = `${id}-sun`;
@@ -33,9 +42,9 @@ export function CityScene({ className, id = "scene" }: { className?: string; id?
     <svg viewBox="0 0 400 320" className={cn("h-auto w-full", className)} role="img" aria-hidden focusable="false">
       <defs>
         <linearGradient id={sky} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#3b28a8" />
-          <stop offset="0.65" stopColor="#6a4be6" />
-          <stop offset="1" stopColor="#9b82ff" />
+          <stop offset="0" stopColor="#0d5446" />
+          <stop offset="0.6" stopColor="#3aa886" />
+          <stop offset="1" stopColor="#ffd9a8" />
         </linearGradient>
         <radialGradient id={sun} cx="0.4" cy="0.35" r="0.7">
           <stop offset="0" stopColor="#fff2b3" />
@@ -48,7 +57,7 @@ export function CityScene({ className, id = "scene" }: { className?: string; id?
       </defs>
 
       {/* soft ground shadow */}
-      <ellipse cx="200" cy="290" rx="150" ry="10" fill="#1e1460" opacity="0.25" />
+      <ellipse cx="200" cy="290" rx="150" ry="10" fill="#052e25" opacity="0.25" />
 
       <circle cx="200" cy="150" r="128" fill={`url(#${sky})`} />
       <g clipPath={`url(#${clip})`}>
@@ -60,6 +69,7 @@ export function CityScene({ className, id = "scene" }: { className?: string; id?
               cy={y}
               r={r}
               fill="#fff"
+              opacity="0.8"
               className="motion-safe:animate-twinkle"
               style={{ animationDelay: `${(i % 5) * 0.6}s` }}
             />
@@ -78,13 +88,13 @@ export function CityScene({ className, id = "scene" }: { className?: string; id?
         <path
           {...depth(5)}
           d="M40 210 Q110 150 165 190 Q215 140 270 185 Q310 160 370 200 L370 300 L40 300 Z"
-          fill="#7c62f0"
-          opacity="0.65"
+          fill="#5cb88a"
+          opacity="0.6"
         />
 
         {/* palace silhouette */}
         <g {...depth(3)}>
-          <g fill="#33238f">
+          <g fill="#0c4a3c">
             <rect x="146" y="186" width="108" height="34" />
             <rect x="184" y="150" width="32" height="40" />
             <path d="M180 152 Q200 112 220 152 Z" />
@@ -105,22 +115,40 @@ export function CityScene({ className, id = "scene" }: { className?: string; id?
         </g>
 
         {/* near hills and road */}
-        <path d="M60 232 Q130 205 200 226 Q270 204 350 230 L350 300 L60 300 Z" fill="#2a1d80" />
-        <rect x="60" y="246" width="290" height="40" fill="#1f1566" />
-        <path d="M70 266 H340" stroke="#a594ff" strokeWidth="2" strokeDasharray="10 10" opacity="0.6" />
+        <path d="M60 232 Q130 205 200 226 Q270 204 350 230 L350 300 L60 300 Z" fill="#0b3d32" />
+        <rect x="60" y="246" width="290" height="40" fill="#082a23" />
+        <path d="M70 266 H340" stroke="#bef264" strokeWidth="2" strokeDasharray="10 10" opacity="0.5" />
 
-        {/* waste-collection truck */}
+        {/* wheelie bins waiting on the pavement; each lifts into the truck as it passes */}
         <g {...depth(1)}>
-          <g className="motion-safe:animate-drive">
-            <rect x="146" y="226" width="62" height="30" rx="5" fill="#ffffff" />
-            <rect x="152" y="234" width="50" height="6" rx="3" fill="#34d399" />
-            <path d="M171 245 l4 -6 l4 6 z" fill="#34d399" />
-            <rect x="208" y="234" width="26" height="22" rx="5" fill="#ffd166" />
-            <rect x="214" y="238" width="13" height="8" rx="2" fill="#3b28a8" />
-            <circle cx="162" cy="258" r="7" fill="#140d45" />
-            <circle cx="162" cy="258" r="2.5" fill="#c9c0ff" />
-            <circle cx="222" cy="258" r="7" fill="#140d45" />
-            <circle cx="222" cy="258" r="2.5" fill="#c9c0ff" />
+          {BINS.map((bin) => (
+            <g key={bin.x}>
+              <g className="scene-bin" style={{ animationDelay: bin.delay }}>
+                <rect x={bin.x - 6} y="231" width="12" height="15" rx="2" fill={bin.color} />
+                <rect x={bin.x - 7} y="228" width="14" height="4" rx="1.5" fill={bin.lid} />
+                <circle cx={bin.x - 4} cy="246.5" r="1.6" fill="#062a23" />
+                <circle cx={bin.x + 4} cy="246.5" r="1.6" fill="#062a23" />
+              </g>
+              <path
+                className="scene-sparkle"
+                style={{ animationDelay: bin.delay }}
+                d={`M${bin.x} 214 l2 5 5 2 -5 2 -2 5 -2 -5 -5 -2 5 -2 z`}
+                fill="#d9f99d"
+              />
+            </g>
+          ))}
+
+          {/* collection truck: drives across, loops */}
+          <g className="scene-truck">
+            <rect x="0" y="226" width="62" height="30" rx="5" fill="#ffffff" />
+            <rect x="6" y="234" width="50" height="6" rx="3" fill="#a3e635" />
+            <path d="M25 245 l4 -6 l4 6 z" fill="#16a34a" />
+            <rect x="62" y="234" width="26" height="22" rx="5" fill="#ffd166" />
+            <rect x="68" y="238" width="13" height="8" rx="2" fill="#0c4a3c" />
+            <circle cx="16" cy="258" r="7" fill="#062a23" />
+            <circle cx="16" cy="258" r="2.5" fill="#d9f99d" />
+            <circle cx="76" cy="258" r="7" fill="#062a23" />
+            <circle cx="76" cy="258" r="2.5" fill="#d9f99d" />
           </g>
         </g>
       </g>

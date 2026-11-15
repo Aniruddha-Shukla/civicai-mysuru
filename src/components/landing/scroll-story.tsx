@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { AlertPreview, Phone, type PreviewState } from "@/components/landing/alert-preview";
 import { cn } from "@/lib/utils";
 
-const DOT = { normal: "bg-violet-500", moved: "bg-amber-500", none: "bg-rose-500" } as const;
+const DOT = { normal: "bg-emerald-500", moved: "bg-amber-500", none: "bg-rose-500" } as const;
 const clamp = (n: number) => Math.min(1, Math.max(0, n));
 
 /**
@@ -99,7 +99,7 @@ export function ScrollStory({
               {/* progress rail */}
               <span className="absolute inset-y-1 left-0 w-1 rounded-full bg-secondary" aria-hidden />
               <span
-                className="absolute left-0 top-1 w-1 origin-top rounded-full bg-gradient-to-b from-violet-500 via-amber-500 to-rose-500"
+                className="absolute left-0 top-1 w-1 origin-top rounded-full bg-gradient-to-b from-emerald-500 via-amber-500 to-rose-500"
                 style={{ height: "calc(100% - 0.5rem)", transform: "scaleY(var(--s))" }}
                 aria-hidden
               />

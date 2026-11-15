@@ -167,7 +167,7 @@ export function DemoSignIn({ hero = false }: { hero?: boolean }) {
             type="button"
             size="lg"
             data-magnetic
-            className="h-14 rounded-2xl bg-white text-base text-primary shadow-lg shadow-black/10 hover:bg-violet-50"
+            className="h-14 rounded-2xl bg-lime-300 text-base text-emerald-950 shadow-lg shadow-lime-300/30 hover:bg-lime-200"
             disabled={pending !== null}
             onClick={() => signIn("citizen")}
           >

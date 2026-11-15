@@ -34,15 +34,15 @@ export default async function OperatorLayout({ children }: { children: React.Rea
 
   return (
     <div className="min-h-dvh">
-      <header className="sticky top-0 z-30 border-b border-primary/10 bg-card/90 backdrop-blur-md">
-        <div className="container flex h-16 items-center justify-between gap-2">
-          <Brand href="/operator" subtitle="Operator console" />
-          <div className="flex items-center gap-2">
-            <span className="hidden rounded-full bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground sm:inline">{profile.name}</span>
-            <SignOutButton label="Sign out" />
+      <header className="sticky top-0 z-30 px-3 pt-3">
+        <div className="container rounded-[1.75rem] border border-white/10 bg-emerald-950/90 text-white shadow-xl shadow-emerald-950/20 backdrop-blur-xl">
+          <div className="flex h-16 items-center justify-between gap-2">
+            <Brand href="/operator" subtitle="Operator console" light />
+            <div className="flex items-center gap-2 [&_button:hover]:bg-white/10 [&_button:hover]:text-white [&_button]:text-white/80">
+              <span className="hidden rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-lime-200 sm:inline">{profile.name}</span>
+              <SignOutButton label="Sign out" />
+            </div>
           </div>
-        </div>
-        <div className="container">
           <OperatorNav />
         </div>
       </header>

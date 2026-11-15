@@ -16,7 +16,7 @@ const ITEMS = [
 export function OperatorNav() {
   const pathname = usePathname();
   return (
-    <nav aria-label="Operator" className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-3 sm:mx-0 sm:px-0">
+    <nav aria-label="Operator" className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-3 [scrollbar-width:none] sm:mx-0 sm:px-0">
       {ITEMS.map((item) => {
         const active = item.exact
           ? pathname === item.href || (item.href === "/operator/events" && /^\/operator\/events\/(?!new)/.test(pathname))
@@ -28,7 +28,7 @@ export function OperatorNav() {
             aria-current={active ? "page" : undefined}
             className={cn(
               "flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-colors",
-              active ? "bg-primary text-primary-foreground shadow-md shadow-primary/25" : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+              active ? "bg-lime-300 text-emerald-950 shadow-lg shadow-lime-300/20" : "text-white/70 hover:bg-white/10 hover:text-white",
             )}
           >
             <item.icon className="size-4" aria-hidden />

@@ -16,7 +16,7 @@ export interface PreviewState {
 }
 
 const LOOK = {
-  normal: { card: "bg-hero", Icon: CalendarCheck, dot: "bg-violet-500" },
+  normal: { card: "bg-hero", Icon: CalendarCheck, dot: "bg-emerald-500" },
   moved: { card: "bg-gradient-to-br from-amber-500 to-orange-600", Icon: CalendarClock, dot: "bg-amber-500" },
   none: { card: "bg-gradient-to-br from-rose-600 to-red-700", Icon: CalendarX, dot: "bg-rose-500" },
 } as const;
@@ -146,7 +146,7 @@ export function Phone({
                 className={cn(
                   "h-12 rounded-xl border-2 transition-colors duration-500",
                   i === 0 ? "opacity-90" : "opacity-40",
-                  state.key === "normal" ? "border-violet-300 bg-violet-50" : state.key === "moved" ? "border-amber-300 bg-amber-50" : "border-rose-300 bg-rose-50",
+                  state.key === "normal" ? "border-emerald-300 bg-emerald-50" : state.key === "moved" ? "border-amber-300 bg-amber-50" : "border-rose-300 bg-rose-50",
                 )}
               />
             ))}

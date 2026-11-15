@@ -28,8 +28,8 @@ const FormSchema = z.object({
 const CATEGORIES: { key: string; label: TKey; text?: TKey; Icon: typeof Truck; tone: string }[] = [
   { key: "missed", label: "report.cat.missed", text: "report.cat.missedText", Icon: CalendarX, tone: "bg-rose-100 text-rose-700" },
   { key: "bin", label: "report.cat.bin", text: "report.cat.binText", Icon: Trash, tone: "bg-amber-100 text-amber-700" },
-  { key: "skipped", label: "report.cat.skipped", text: "report.cat.skippedText", Icon: Truck, tone: "bg-indigo-100 text-indigo-700" },
-  { key: "other", label: "report.cat.other", Icon: PencilLine, tone: "bg-violet-100 text-violet-700" },
+  { key: "skipped", label: "report.cat.skipped", text: "report.cat.skippedText", Icon: Truck, tone: "bg-teal-100 text-teal-700" },
+  { key: "other", label: "report.cat.other", Icon: PencilLine, tone: "bg-emerald-100 text-emerald-700" },
 ];
 
 function Step({ n, title, done, children }: { n: number; title: string; done: boolean; children: React.ReactNode }) {
@@ -161,10 +161,10 @@ export function ComplaintForm({
   return (
     <form noValidate onSubmit={onSubmit} className="space-y-7">
       {/* How far along the report is: fills as each step is done */}
-      <div className="sticky top-[6.75rem] z-20 -mx-1 rounded-full bg-background/80 p-1 backdrop-blur" aria-hidden>
+      <div className="sticky top-[5.75rem] z-20 -mx-1 rounded-full bg-background/80 p-1 backdrop-blur" aria-hidden>
         <div className="h-2 overflow-hidden rounded-full bg-secondary">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-violet-500 to-emerald-500 transition-[width] duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)]"
+            className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-500 transition-[width] duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)]"
             style={{ width: `${Math.max(6, (progress / 3) * 100)}%` }}
           />
         </div>
