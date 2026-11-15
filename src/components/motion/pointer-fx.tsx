@@ -50,10 +50,72 @@ export function PointerFx() {
     });
     mo.observe(document.body, { childList: true, subtree: true });
 
+    // ── Scroll-linked progress (--p from 0 to 1) for 3D scroll effects ──
+    //   data-scroll="enter"  0 as the element comes up from the bottom → 1 once its top reaches ~30% of the screen
+    //   data-scroll="exit"   0 while the element is in place → 1 once it has scrolled fully out of the top
+    //   data-scroll="page"   how far down the whole page you are
+    // Reduced motion: never set, so the CSS fallbacks (finished state) apply.
+    let scrollFrame = 0;
+    const visible = new Set<HTMLElement>();
+    const sio = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (e.isIntersecting) visible.add(e.target as HTMLElement);
+        else visible.delete(e.target as HTMLElement);
+      }
+      queueScroll();
+    });
+    const clamp = (n: number) => Math.min(1, Math.max(0, n));
+    const updateScroll = () => {
+      scrollFrame = 0;
+      const vh = window.innerHeight;
+      for (const el of visible) {
+        if (!el.isConnected) {
+          visible.delete(el);
+          continue;
+        }
+        const mode = el.dataset.scroll;
+        let p: number;
+        if (mode === "page") {
+          const max = document.documentElement.scrollHeight - vh;
+          p = max > 0 ? window.scrollY / max : 0;
+        } else {
+          const r = el.getBoundingClientRect();
+          p = mode === "exit" ? clamp(-r.top / Math.max(1, r.height)) : clamp((vh * 0.92 - r.top) / (vh * 0.62));
+        }
+        el.style.setProperty("--p", p.toFixed(4));
+      }
+    };
+    function queueScroll() {
+      if (!scrollFrame) scrollFrame = requestAnimationFrame(updateScroll);
+    }
+    const scanScroll = () => {
+      if (reduceMotion) return;
+      document.querySelectorAll<HTMLElement>("[data-scroll]:not([data-scroll-bound])").forEach((el) => {
+        el.setAttribute("data-scroll-bound", "");
+        // The page bar is always "visible"; everything else is tracked only while on screen.
+        if (el.dataset.scroll === "page") visible.add(el);
+        else sio.observe(el);
+      });
+      queueScroll();
+    };
+    scanScroll();
+    const mo2 = new MutationObserver(() => requestAnimationFrame(scanScroll));
+    mo2.observe(document.body, { childList: true, subtree: true });
+    window.addEventListener("scroll", queueScroll, { passive: true });
+    window.addEventListener("resize", queueScroll);
+    const stopScroll = () => {
+      sio.disconnect();
+      mo2.disconnect();
+      cancelAnimationFrame(scrollFrame);
+      window.removeEventListener("scroll", queueScroll);
+      window.removeEventListener("resize", queueScroll);
+    };
+
     if (!finePointer) {
       return () => {
         io.disconnect();
         mo.disconnect();
+        stopScroll();
       };
     }
 
@@ -137,6 +199,7 @@ export function PointerFx() {
     return () => {
       io.disconnect();
       mo.disconnect();
+      stopScroll();
       cancelAnimationFrame(frame);
       document.removeEventListener("pointermove", onMove);
       document.documentElement.removeEventListener("pointerleave", onLeave);

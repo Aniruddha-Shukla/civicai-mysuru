@@ -228,3 +228,59 @@
     transform: scaleX(1);
   }
 }
+
+/* ───────────────────── Scroll-linked 3D (driven by --p) ─────────────────────
+ * Fallback values are the finished state, so with reduced motion (or before JS runs)
+ * everything is simply in place.
+ */
+@layer components {
+  /* Hero: content lifts and the scene tips back into the screen as you scroll away. */
+  .hero-exit-text {
+    transform: translate3d(0, calc(var(--p, 0) * -80px), 0);
+    opacity: calc(1 - var(--p, 0) * 1.6);
+  }
+  .hero-exit-scene {
+    transform: perspective(1100px) rotateX(calc(var(--p, 0) * 38deg)) scale(calc(1 - var(--p, 0) * 0.25))
+      translate3d(0, calc(var(--p, 0) * 60px), 0);
+    transform-origin: 50% 100%;
+    opacity: calc(1 - var(--p, 0) * 1.2);
+  }
+
+  /* Cards fly up out of the page in 3D, one after another (--i = order). */
+  .fly-3d {
+    --q: clamp(0, calc(var(--p, 1) * 1.6 - var(--i, 0) * 0.3), 1);
+    transform: perspective(1200px) translate3d(0, calc((1 - var(--q)) * 90px), calc((1 - var(--q)) * -160px))
+      rotateX(calc((1 - var(--q)) * 42deg));
+    transform-origin: 50% 100%;
+    opacity: var(--q);
+  }
+
+  /* Big statement: words light up one by one as it scrolls into view (--n words, --w index). */
+  .light-word {
+    opacity: clamp(0.14, calc(var(--p, 1) * var(--n, 1) * 1.15 - var(--w, 0)), 1);
+    transition: opacity 0.15s linear;
+  }
+
+  /* Closing card rises and straightens. */
+  .rise-3d {
+    transform: perspective(1400px) rotateX(calc((1 - var(--p, 1)) * 28deg)) scale(calc(0.88 + var(--p, 1) * 0.12));
+    transform-origin: 50% 100%;
+  }
+
+  /* Thin bar at the very top showing how far down the page you are. */
+  .page-progress {
+    transform: scaleX(var(--p, 0));
+    transform-origin: 0 50%;
+  }
+
+  /* 3D variant of the scroll reveal (used for notice cards). */
+  [data-reveal="3d"] {
+    transform-origin: 50% 100%;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-reveal="3d"]:not([data-shown]) {
+    transform: perspective(1000px) translateY(40px) rotateX(16deg);
+  }
+}

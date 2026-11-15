@@ -242,7 +242,15 @@
     "m3": "Only your ward",
     "m4": "No guessed dates",
     "m5": "Report in 3 taps",
-    "scroll": "See how it works"
+    "scroll": "See how it works",
+    "storyTitle": "One glance tells you everything",
+    "storyHint": "Keep scrolling",
+    "storyNormal": "Your usual day and time, with a reminder to keep waste ready.",
+    "storyMoved": "The city confirmed a new date. You get the exact official alert.",
+    "storyNone": "No new date yet? We say so plainly — never a guess.",
+    "principleKicker": "Our promise",
+    "ctaTitle": "See it for yourself",
+    "ctaBody": "Open the demo in one tap. No password, nothing to install."
   },
   "common": {
     "loading": "Loading…",

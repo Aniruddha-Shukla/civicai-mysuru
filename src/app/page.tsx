@@ -3,9 +3,11 @@ import Link from "next/link";
 import { DemoSignIn } from "@/components/auth-card";
 import { Brand } from "@/components/brand";
 import { CityScene } from "@/components/city-scene";
-import { AlertPreview, type PreviewState } from "@/components/landing/alert-preview";
+import type { PreviewState } from "@/components/landing/alert-preview";
+import { ScrollStory } from "@/components/landing/scroll-story";
 import { LanguageToggle } from "@/components/language-toggle";
 import { Marquee } from "@/components/motion/marquee";
+import { ScrollWords } from "@/components/motion/scroll-words";
 import { SplitWords } from "@/components/motion/split-words";
 import { Button } from "@/components/ui/button";
 import { getSessionProfile } from "@/lib/auth";
@@ -76,9 +78,28 @@ export default async function LandingPage() {
     </Button>
   );
 
+  const demoOrStart = showDemo ? (
+    <div className="space-y-3">
+      <DemoSignIn hero />
+      <Link
+        href="/login?mode=signup"
+        className="group inline-flex items-center gap-1 pt-1 text-sm font-semibold text-white underline-offset-4 hover:underline"
+      >
+        {t("auth.signUpCta")} <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" aria-hidden />
+      </Link>
+    </div>
+  ) : (
+    primaryCta(home ?? "/login?mode=signup")
+  );
+
   return (
     <div className="min-h-dvh">
-      <div className="bg-hero grain relative overflow-hidden rounded-b-[2.5rem] text-white shadow-xl shadow-primary/20">
+      {/* how far down the page you are */}
+      <div className="fixed inset-x-0 top-0 z-50 h-1" aria-hidden>
+        <div data-scroll="page" className="page-progress h-full bg-gradient-to-r from-fuchsia-400 via-violet-500 to-indigo-500" />
+      </div>
+
+      <div data-scroll="exit" className="bg-hero grain relative overflow-hidden rounded-b-[2.5rem] text-white shadow-xl shadow-primary/20">
         {/* slow drifting colour blobs behind the hero */}
         <div className="pointer-events-none absolute inset-0" aria-hidden>
           <div className="absolute -left-24 top-10 size-80 rounded-full bg-fuchsia-400/30 blur-3xl motion-safe:animate-aurora" />
@@ -97,41 +118,28 @@ export default async function LandingPage() {
           </div>
         </header>
 
-        <section className="container relative grid max-w-5xl items-center gap-4 pb-10 pt-4 md:grid-cols-2 md:gap-10 md:pb-14 md:pt-10">
-          <div className="text-center md:order-2" data-parallax>
-            <CityScene id="hero-scene" className="mx-auto max-w-[17rem] sm:max-w-sm md:max-w-md" />
+        <section className="container relative grid max-w-5xl items-center gap-4 pb-10 pt-4 md:min-h-[calc(100dvh-9rem)] md:grid-cols-2 md:gap-10 md:pb-14">
+          <div className="hero-exit-scene text-center md:order-2">
+            <div data-parallax>
+              <CityScene id="hero-scene" className="mx-auto max-w-[17rem] sm:max-w-sm md:max-w-md" />
+            </div>
           </div>
-          <div className="text-center md:order-1 md:text-left">
-            <h1 className="text-3xl font-extrabold leading-tight tracking-tight sm:text-5xl">
+          <div className="hero-exit-text text-center md:order-1 md:text-left">
+            <h1 className="text-3xl font-extrabold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
               <SplitWords text={t("landing.headline")} />
             </h1>
             <p className="mx-auto mt-4 max-w-xl text-base text-white/85 animate-in fade-in-0 slide-in-from-bottom-2 fill-mode-both delay-500 duration-700 sm:text-lg md:mx-0">
               {t("landing.body")}
             </p>
-
             <div className="mx-auto mt-8 max-w-xl animate-in fade-in-0 slide-in-from-bottom-3 fill-mode-both delay-700 duration-700 md:mx-0">
-              {home ? (
-                primaryCta(home)
-              ) : showDemo ? (
-                <div className="space-y-3">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-white/70">{t("landing.tryIt")}</p>
-                  <DemoSignIn hero />
-                  <Link
-                    href="/login?mode=signup"
-                    className="group inline-flex items-center gap-1 pt-1 text-sm font-semibold text-white underline-offset-4 hover:underline"
-                  >
-                    {t("auth.signUpCta")} <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" aria-hidden />
-                  </Link>
-                </div>
-              ) : (
-                primaryCta("/login?mode=signup")
-              )}
+              {showDemo ? <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-white/70">{t("landing.tryIt")}</p> : null}
+              {demoOrStart}
             </div>
           </div>
         </section>
 
         <a
-          href="#how-heading"
+          href="#principle"
           className="relative mx-auto mb-6 hidden w-fit items-center gap-2 rounded-full border border-white/30 px-4 py-2 text-xs font-semibold text-white/85 transition-colors hover:bg-white/10 md:flex"
         >
           {t("landing.scroll")} <ArrowDown className="size-4 motion-safe:animate-bounce" aria-hidden />
@@ -142,48 +150,57 @@ export default async function LandingPage() {
         <Marquee items={[t("landing.m1"), t("landing.m2"), t("landing.m3"), t("landing.m4"), t("landing.m5")]} />
       </div>
 
-      <main className="container max-w-4xl space-y-16 pb-16 pt-12">
-        <section aria-labelledby="how-heading" className="space-y-6">
-          <h2 id="how-heading" data-reveal className="text-center text-2xl font-extrabold tracking-tight sm:text-3xl">
+      <main>
+        {/* The core promise, lit word by word as you scroll */}
+        <section id="principle" className="container max-w-4xl scroll-mt-10 py-20 sm:py-28">
+          <p className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-primary">{t("landing.principleKicker")}</p>
+          <ScrollWords text={t("app.principle")} className="text-3xl font-extrabold leading-[1.15] tracking-tight sm:text-5xl" />
+        </section>
+
+        <section aria-labelledby="how-heading" className="container max-w-5xl space-y-8 pb-10">
+          <h2 id="how-heading" data-reveal className="text-center text-2xl font-extrabold tracking-tight sm:text-4xl">
             {t("landing.howTitle")}
           </h2>
-          <ol className="grid gap-4 sm:grid-cols-3">
+          <ol className="grid gap-5 sm:grid-cols-3">
             {steps.map((step, i) => (
-              <li
-                key={step.title}
-                data-reveal
-                data-spotlight
-                style={{ "--i": i } as React.CSSProperties}
-                className="spotlight group relative rounded-3xl border bg-card p-6 shadow-soft"
-              >
-                <span className="absolute right-5 top-4 text-4xl font-extrabold text-primary/15 transition-colors group-hover:text-primary/30">
-                  {i + 1}
-                </span>
-                <span
-                  className={`mb-4 flex size-12 items-center justify-center rounded-2xl transition-transform duration-500 group-hover:-rotate-6 group-hover:scale-110 ${step.tone}`}
-                >
-                  <step.icon className="size-6" aria-hidden />
-                </span>
-                <h3 className="font-bold">{step.title}</h3>
-                <p className="mt-1 text-sm text-muted-foreground">{step.body}</p>
+              <li key={step.title} data-scroll="enter" className="fly-3d" style={{ "--i": i } as React.CSSProperties}>
+                <div data-tilt="10" data-spotlight className="spotlight group relative h-full overflow-hidden rounded-3xl border bg-card p-6 shadow-soft">
+                  <span className="glare" aria-hidden />
+                  <span className="absolute right-5 top-3 text-6xl font-black text-primary/10 transition-colors group-hover:text-primary/25">{i + 1}</span>
+                  <span
+                    className={`mb-4 flex size-14 items-center justify-center rounded-2xl transition-transform duration-500 group-hover:-rotate-6 group-hover:scale-110 ${step.tone}`}
+                  >
+                    <step.icon className="size-7" aria-hidden />
+                  </span>
+                  <h3 className="text-lg font-bold">{step.title}</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">{step.body}</p>
+                </div>
               </li>
             ))}
           </ol>
         </section>
 
-        <section aria-labelledby="preview-heading" className="space-y-6">
-          <div data-reveal className="text-center">
-            <h2 id="preview-heading" className="text-2xl font-extrabold tracking-tight sm:text-3xl">
-              {t("landing.previewTitle")}
-            </h2>
-            <p className="mt-2 text-muted-foreground">{t("landing.previewBody")}</p>
+        <ScrollStory
+          states={previewStates(lang, t, new Date())}
+          details={[t("landing.storyNormal"), t("landing.storyMoved"), t("landing.storyNone")]}
+          title={t("landing.storyTitle")}
+          hint={t("landing.storyHint")}
+          example={t("landing.previewExample")}
+          appName={t("app.name")}
+        />
+
+        {/* Closing call to action: rises and straightens as it scrolls in */}
+        <section data-scroll="enter" className="container max-w-5xl pb-20 pt-6">
+          <div className="rise-3d bg-hero grain relative overflow-hidden rounded-[2.5rem] px-6 py-14 text-center text-white shadow-2xl shadow-primary/30 sm:px-12">
+            <div className="pointer-events-none absolute inset-0" aria-hidden>
+              <div className="absolute -right-16 -top-16 size-72 rounded-full bg-fuchsia-400/30 blur-3xl motion-safe:animate-aurora" />
+            </div>
+            <div className="relative mx-auto max-w-xl">
+              <h2 className="text-3xl font-extrabold tracking-tight sm:text-5xl">{t("landing.ctaTitle")}</h2>
+              <p className="mt-3 text-white/85 sm:text-lg">{t("landing.ctaBody")}</p>
+              <div className="mt-8">{demoOrStart}</div>
+            </div>
           </div>
-          <div data-reveal style={{ "--i": 1 } as React.CSSProperties}>
-            <AlertPreview states={previewStates(lang, t, new Date())} example={t("landing.previewExample")} appName={t("app.name")} />
-          </div>
-          <p data-reveal className="text-center text-xs text-muted-foreground">
-            {t("app.principle")}
-          </p>
         </section>
       </main>
 

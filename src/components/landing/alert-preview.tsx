@@ -42,7 +42,6 @@ export function AlertPreview({ states, example, appName }: { states: PreviewStat
     if (focus) tabs.current[i]?.focus();
   };
   const state = states[index]!;
-  const look = LOOK[state.key];
 
   return (
     <div className="grid items-center gap-8 md:grid-cols-[1fr_auto]" onPointerEnter={() => setAuto(false)}>
@@ -89,34 +88,68 @@ export function AlertPreview({ states, example, appName }: { states: PreviewStat
         })}
       </div>
 
-      {/* Phone */}
-      <div className="mx-auto w-[17.5rem] rounded-[2.6rem] border-[6px] border-slate-900 bg-slate-900 shadow-2xl shadow-primary/30" data-tilt="8">
-        <div className="relative overflow-hidden rounded-[2.1rem] bg-background">
-          <span className="glare z-10" aria-hidden />
-          <div className="mx-auto mt-2 h-5 w-24 rounded-full bg-slate-900" aria-hidden />
-          <div id="preview-panel" role="tabpanel" aria-labelledby={`preview-tab-${state.key}`} aria-live="polite" className="space-y-3 p-3 pb-6">
-            {state.message ? (
-              <div key={`msg-${state.key}`} className="animate-in fade-in-0 slide-in-from-top-4 duration-500 rounded-2xl bg-card/95 p-3 text-[11px] leading-snug shadow-lg ring-1 ring-black/5">
-                <p className="mb-1 flex items-center gap-1.5 font-bold text-primary">
-                  <BellRing className="size-3.5" aria-hidden /> {appName}
-                </p>
-                <p className="text-foreground/90">{state.message}</p>
-              </div>
-            ) : null}
-            <div key={`card-${state.key}`} className={cn("animate-in fade-in-0 zoom-in-95 duration-500 rounded-3xl p-4 text-white shadow-lg", look.card)}>
-              <div className="flex items-center justify-between gap-2">
-                <look.Icon className="size-6" aria-hidden />
-                <span className="rounded-full bg-white/20 px-2.5 py-0.5 text-[10px] font-semibold">{state.pill}</span>
-              </div>
-              {state.struck ? <p className="mt-3 text-sm font-semibold line-through opacity-80">{state.struck}</p> : null}
-              <p className={cn("text-xl font-extrabold leading-tight", !state.struck && "mt-3")}>{state.title}</p>
-              <p className="mt-1 text-xs opacity-90">{state.sub}</p>
+      <Phone state={state} appName={appName} panelId="preview-panel" labelledBy={`preview-tab-${state.key}`} />
+    </div>
+  );
+}
+
+/** The phone mockup with the resident's screen for one situation. Shared by the click preview and the scroll story. */
+export function Phone({
+  state,
+  appName,
+  panelId,
+  labelledBy,
+  tilt = true,
+  className,
+}: {
+  state: PreviewState;
+  appName: string;
+  panelId?: string;
+  labelledBy?: string;
+  tilt?: boolean;
+  className?: string;
+}) {
+  const look = LOOK[state.key];
+  return (
+    <div
+      className={cn("mx-auto w-[17.5rem] rounded-[2.6rem] border-[6px] border-slate-900 bg-slate-900 shadow-2xl shadow-primary/30", className)}
+      data-tilt={tilt ? "8" : undefined}
+    >
+      <div className="relative overflow-hidden rounded-[2.1rem] bg-background">
+        <span className="glare z-10" aria-hidden />
+        <div className="mx-auto mt-2 h-5 w-24 rounded-full bg-slate-900" aria-hidden />
+        <div id={panelId} role={panelId ? "tabpanel" : undefined} aria-labelledby={labelledBy} aria-live="polite" className="space-y-3 p-3 pb-6">
+          {state.message ? (
+            <div
+              key={`msg-${state.key}`}
+              className="animate-in fade-in-0 slide-in-from-top-4 duration-500 rounded-2xl bg-card/95 p-3 text-[11px] leading-snug shadow-lg ring-1 ring-black/5"
+            >
+              <p className="mb-1 flex items-center gap-1.5 font-bold text-primary">
+                <BellRing className="size-3.5" aria-hidden /> {appName}
+              </p>
+              <p className="text-foreground/90">{state.message}</p>
             </div>
-            <div className="grid grid-cols-3 gap-1.5" aria-hidden>
-              {[0, 1, 2].map((i) => (
-                <span key={i} className={cn("h-12 rounded-xl border-2", i === 0 ? "border-current opacity-90" : "opacity-40", state.key === "normal" ? "border-violet-300 bg-violet-50" : state.key === "moved" ? "border-amber-300 bg-amber-50" : "border-rose-300 bg-rose-50")} />
-              ))}
+          ) : null}
+          <div key={`card-${state.key}`} className={cn("animate-in fade-in-0 zoom-in-95 duration-500 rounded-3xl p-4 text-white shadow-lg", look.card)}>
+            <div className="flex items-center justify-between gap-2">
+              <look.Icon className="size-6" aria-hidden />
+              <span className="rounded-full bg-white/20 px-2.5 py-0.5 text-[10px] font-semibold">{state.pill}</span>
             </div>
+            {state.struck ? <p className="mt-3 text-sm font-semibold line-through opacity-80">{state.struck}</p> : null}
+            <p className={cn("text-xl font-extrabold leading-tight", !state.struck && "mt-3")}>{state.title}</p>
+            <p className="mt-1 text-xs opacity-90">{state.sub}</p>
+          </div>
+          <div className="grid grid-cols-3 gap-1.5" aria-hidden>
+            {[0, 1, 2].map((i) => (
+              <span
+                key={i}
+                className={cn(
+                  "h-12 rounded-xl border-2 transition-colors duration-500",
+                  i === 0 ? "opacity-90" : "opacity-40",
+                  state.key === "normal" ? "border-violet-300 bg-violet-50" : state.key === "moved" ? "border-amber-300 bg-amber-50" : "border-rose-300 bg-rose-50",
+                )}
+              />
+            ))}
           </div>
         </div>
       </div>

@@ -194,7 +194,7 @@ export default async function DashboardPage() {
         ) : (
           <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
             {view.events.map((event, i) => (
-              <div key={event.id} data-reveal style={{ "--i": i % 2 } as React.CSSProperties}>
+              <div key={event.id} data-reveal="3d" style={{ "--i": i % 2 } as React.CSSProperties}>
                 <EventCard
                   id={`notice-${event.id}`}
                   lang={lang}
