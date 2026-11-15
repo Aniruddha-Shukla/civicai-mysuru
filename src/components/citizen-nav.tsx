@@ -24,33 +24,80 @@ function Badge({ count, className }: { count: number; className?: string }) {
  * Citizen navigation as a dark floating dock with a lime pill that slides to the current page.
  * "top" sits in the header on wide screens; "bottom" is the thumb-friendly dock on phones.
  */
-export function CitizenNav({ unread, variant }: { unread: number; variant: "top" | "bottom" }) {
+export function CitizenNav({ unread, variant }: { unread: number; variant: "top" | "bottom" | "side" }) {
   const { t } = useI18n();
   const pathname = usePathname();
   const items = [
-    { href: "/dashboard", label: t("nav.home"), icon: House },
-    { href: "/notifications", label: t("nav.alerts"), icon: Bell, badge: unread },
-    { href: "/ask", label: t("nav.ask"), icon: MessageCircleQuestionMark },
-    { href: "/report", label: t("nav.report"), icon: Megaphone },
+    { href: "/dashboard", label: t("nav.home"), hint: t("nav.homeHint"), icon: House },
+    { href: "/notifications", label: t("nav.alerts"), hint: t("nav.alertsHint"), icon: Bell, badge: unread },
+    { href: "/ask", label: t("nav.ask"), hint: t("nav.askHint"), icon: MessageCircleQuestionMark },
+    { href: "/report", label: t("nav.report"), hint: t("nav.reportHint"), icon: Megaphone },
   ];
   const activeIndex = items.findIndex((item) => pathname === item.href || pathname.startsWith(`${item.href}/`));
 
   // Measure the active link so the pill can glide to it.
   const links = useRef<(HTMLAnchorElement | null)[]>([]);
-  const [pill, setPill] = useState<{ left: number; width: number } | null>(null);
+  const [pill, setPill] = useState<{ left: number; width: number; top: number; height: number } | null>(null);
   useLayoutEffect(() => {
     const measure = () => {
       const el = links.current[activeIndex];
-      setPill(el ? { left: el.offsetLeft, width: el.offsetWidth } : null);
+      setPill(el ? { left: el.offsetLeft, width: el.offsetWidth, top: el.offsetTop, height: el.offsetHeight } : null);
     };
     measure();
     window.addEventListener("resize", measure);
     return () => window.removeEventListener("resize", measure);
   }, [activeIndex, variant]);
 
+  if (variant === "side") {
+    return (
+      <nav aria-label="Main" className="relative flex flex-col gap-1">
+        {pill ? (
+          <span
+            aria-hidden
+            className="absolute inset-x-0 rounded-2xl bg-lime-300 shadow-lg shadow-lime-300/20 transition-all duration-500 ease-[cubic-bezier(0.2,0.8,0.2,1)]"
+            style={{ top: pill.top, height: pill.height }}
+          />
+        ) : null}
+        {items.map((item, i) => {
+          const active = i === activeIndex;
+          return (
+            <Link
+              key={item.href}
+              ref={(el) => {
+                links.current[i] = el;
+              }}
+              href={item.href}
+              aria-current={active ? "page" : undefined}
+              className={cn(
+                "group relative flex items-center gap-3 rounded-2xl p-2.5 transition-colors duration-300",
+                active ? "text-emerald-950" : "text-white/75 hover:bg-white/5 hover:text-white",
+              )}
+            >
+              <span
+                className={cn(
+                  "flex size-10 shrink-0 items-center justify-center rounded-xl transition-all duration-300 group-hover:scale-105",
+                  active ? "bg-emerald-950/10" : "bg-white/5 group-hover:bg-white/10",
+                )}
+              >
+                <item.icon className="size-5" aria-hidden />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="flex items-center gap-2 font-bold">
+                  {item.label}
+                  {item.badge ? <Badge count={item.badge} /> : null}
+                </span>
+                <span className={cn("block truncate text-xs", active ? "text-emerald-900/80" : "text-white/50")}>{item.hint}</span>
+              </span>
+            </Link>
+          );
+        })}
+      </nav>
+    );
+  }
+
   if (variant === "top") {
     return (
-      <nav aria-label="Main" className="relative hidden items-center gap-1 rounded-full bg-white/5 p-1 md:flex">
+      <nav aria-label="Main" className="relative hidden items-center gap-1 rounded-full bg-white/5 p-1 md:flex lg:hidden">
         {pill ? (
           <span
             aria-hidden

@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 /** Pages that use the full width on big screens; everything else (forms, lists) keeps a comfortable reading width. */
-const WIDE = new Set(["/dashboard"]);
+const WIDE = new Set(["/dashboard", "/report"]);
 
 /** Re-mounts on every navigation, so each page glides in instead of popping. */
 export default function Template({ children }: { children: React.ReactNode }) {

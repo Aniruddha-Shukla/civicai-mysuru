@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, CalendarCheck, CalendarClock, CalendarX, ChevronLeft, ChevronRight, CircleQuestionMark, RefreshCw } from "lucide-react";
+import { ArrowRight, CalendarCheck, CalendarClock, CalendarX, ChevronLeft, ChevronRight, CircleQuestionMark, Pointer, RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useI18n } from "@/components/i18n-provider";
 import type { PickupStatus } from "@/lib/pickups";
@@ -32,13 +32,15 @@ const LOOK: Record<PickupStatus, { tile: string; dot: string; Icon: typeof Calen
  */
 export function PickupStrip({ days }: { days: StripDay[] }) {
   const { t } = useI18n();
-  const [selected, setSelected] = useState(days[0]?.key ?? "");
+  // Nothing is opened at first: the big card above already tells you about the next pickup.
+  const [selected, setSelected] = useState<string | null>(null);
   const [edges, setEdges] = useState({ start: true, end: false });
   const scroller = useRef<HTMLDivElement>(null);
   const tiles = useRef<Map<string, HTMLButtonElement>>(new Map());
 
-  const index = Math.max(0, days.findIndex((d) => d.key === selected));
-  const current = days[index];
+  const selectedIndex = days.findIndex((d) => d.key === selected);
+  const index = Math.max(0, selectedIndex); // keyboard focus position
+  const current = selectedIndex >= 0 ? days[selectedIndex] : undefined;
 
   const updateEdges = useCallback(() => {
     const el = scroller.current;
@@ -51,8 +53,8 @@ export function PickupStrip({ days }: { days: StripDay[] }) {
     return () => window.removeEventListener("resize", updateEdges);
   }, [updateEdges]);
 
-  if (!current) return null;
-  const look = LOOK[current.status];
+  if (days.length === 0) return null;
+  const look = current ? LOOK[current.status] : null;
 
   const select = (i: number, focus: boolean) => {
     const day = days[Math.min(days.length - 1, Math.max(0, i))]!;
@@ -88,7 +90,7 @@ export function PickupStrip({ days }: { days: StripDay[] }) {
         >
           {days.map((d, i) => {
             const l = LOOK[d.status];
-            const active = i === index;
+            const active = i === selectedIndex;
             return (
               <button
                 key={d.key}
@@ -99,9 +101,9 @@ export function PickupStrip({ days }: { days: StripDay[] }) {
                 type="button"
                 role="option"
                 aria-selected={active}
-                tabIndex={active ? 0 : -1}
+                tabIndex={i === index ? 0 : -1}
                 aria-label={`${d.weekday} ${d.day} ${d.month}: ${t(`home.status.${d.status}`)}`}
-                onClick={() => select(i, false)}
+                onClick={() => (active ? setSelected(null) : select(i, false))}
                 className={cn(
                   "flex min-w-[4.75rem] shrink-0 snap-start flex-col items-center gap-0.5 rounded-2xl border-2 px-2 py-2.5 transition-all duration-300 sm:min-w-[5.5rem] sm:flex-1 sm:py-3",
                   l.tile,
@@ -143,22 +145,29 @@ export function PickupStrip({ days }: { days: StripDay[] }) {
         })}
       </div>
 
-      <div
-        key={current.key}
-        aria-live="polite"
-        className={cn("flex items-start gap-3 rounded-2xl border p-4 animate-in fade-in-0 slide-in-from-top-1 duration-300", look.tile)}
-      >
-        <look.Icon className="mt-0.5 size-6 shrink-0" aria-hidden />
-        <div className="min-w-0">
-          <p className="font-bold">{current.title}</p>
-          <p className="text-sm">{current.detail}</p>
-          {current.noticeId ? (
-            <a href={`#notice-${current.noticeId}`} className="group mt-1 inline-flex items-center gap-1 text-sm font-semibold underline-offset-4 hover:underline">
-              {t("home.seeNotice")} <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" aria-hidden />
-            </a>
-          ) : null}
+      {current && look ? (
+        <div
+          key={current.key}
+          aria-live="polite"
+          className={cn("flex items-start gap-3 rounded-2xl border p-4 animate-in fade-in-0 slide-in-from-top-1 duration-300", look.tile)}
+        >
+          <look.Icon className="mt-0.5 size-6 shrink-0" aria-hidden />
+          <div className="min-w-0">
+            <p className="font-bold">{current.title}</p>
+            <p className="text-sm">{current.detail}</p>
+            {current.noticeId ? (
+              <a href={`#notice-${current.noticeId}`} className="group mt-1 inline-flex items-center gap-1 text-sm font-semibold underline-offset-4 hover:underline">
+                {t("home.seeNotice")} <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" aria-hidden />
+              </a>
+            ) : null}
+          </div>
         </div>
-      </div>
+      ) : (
+        <p className="flex items-center gap-2 px-1 text-sm text-muted-foreground">
+          <Pointer className="size-4 shrink-0 text-primary motion-safe:animate-bounce" aria-hidden />
+          {t("home.tapDay")}
+        </p>
+      )}
     </div>
   );
 }

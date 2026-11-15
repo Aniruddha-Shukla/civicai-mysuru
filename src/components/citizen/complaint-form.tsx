@@ -161,7 +161,7 @@ export function ComplaintForm({
   return (
     <form noValidate onSubmit={onSubmit} className="space-y-7">
       {/* How far along the report is: fills as each step is done */}
-      <div className="sticky top-[5.75rem] z-20 -mx-1 rounded-full bg-background/80 p-1 backdrop-blur" aria-hidden>
+      <div className="sticky top-[5.75rem] lg:top-4 z-20 -mx-1 rounded-full bg-background/80 p-1 backdrop-blur" aria-hidden>
         <div className="h-2 overflow-hidden rounded-full bg-secondary">
           <div
             className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-500 transition-[width] duration-700 ease-[cubic-bezier(0.2,0.8,0.2,1)]"

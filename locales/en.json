@@ -11,7 +11,14 @@
     "report": "Report",
     "signOut": "Sign out",
     "switchLanguage": "ಕನ್ನಡ",
-    "menu": "Menu"
+    "menu": "Menu",
+    "homeHint": "Your pickups at a glance",
+    "alertsHint": "Messages from the city",
+    "askHint": "Questions in plain words",
+    "reportHint": "Tell the city about a problem",
+    "yourWard": "Your ward",
+    "tipTitle": "Clean city tip",
+    "tip": "Keep wet and dry waste in separate bins. It makes collection faster."
   },
   "status": {
     "VERIFIED": "Verified",
@@ -96,6 +103,20 @@
       "no_alternative_published": "Pickup affected",
       "retraction": "Earlier alert cancelled",
       "update": "New information"
+    },
+    "statNew": "{count} new",
+    "statTotal": "{count} in total",
+    "exact": "Kept exactly as sent",
+    "meaningTitle": "What this means for you",
+    "official": "Official message, word for word",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "earlier": "Earlier",
+    "meaning": {
+      "verified_alternative": "Your pickup has moved to a new day. Put your waste out on the new day and time.",
+      "no_alternative_published": "There is no pickup that day and no new date yet. Keep your waste inside until we alert you again.",
+      "retraction": "Ignore the earlier alert. Your normal pickup day applies.",
+      "update": "Something has changed. Read the message below."
     }
   },
   "ask": {
@@ -112,7 +133,12 @@
     "deterministic": "Verified information on record",
     "noInformation": "No verified information",
     "rejected": "The AI answer could not be verified against the records, so the verified information on record is shown instead.",
-    "cited": "Based on"
+    "cited": "Based on",
+    "chipVerified": "Answers only from verified records",
+    "chipLang": "English & ಕನ್ನಡ",
+    "thinking": "Checking the verified records…",
+    "you": "You",
+    "start": "Pick a question or type your own"
   },
   "report": {
     "title": "Report a problem",
@@ -150,7 +176,22 @@
       "skipped": "Vehicle skipped my lane",
       "skippedText": "The collection vehicle skipped our lane.",
       "other": "Something else"
-    }
+    },
+    "chipSteps": "3 easy steps",
+    "chipPhoto": "Photo optional",
+    "chipTrack": "Track every report",
+    "openCount": "{count} open",
+    "nextTitle": "What happens next",
+    "next1Title": "You send it",
+    "next1Body": "Your report reaches the city operators for your ward.",
+    "next2Title": "The city reviews it",
+    "next2Body": "An operator checks it and may add a note for you.",
+    "next3Title": "You see the result",
+    "next3Body": "Its status updates here as it moves along.",
+    "tipsTitle": "Tips for a quick fix",
+    "tip1": "Say exactly where: the street or a landmark.",
+    "tip2": "A photo helps the city act faster.",
+    "tip3": "Don't include other people's personal details."
   },
   "tracker": {
     "title": "Complaint status",

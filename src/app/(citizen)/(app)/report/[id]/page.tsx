@@ -1,9 +1,10 @@
-import { ArrowLeft, Check, CircleX, MapPin, MessageSquareText } from "lucide-react";
+import { ArrowLeft, CalendarDays, Check, CircleX, ClipboardCheck, MapPin, MessageSquareText, Truck } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { DeleteLocationButton } from "@/components/citizen/delete-location-button";
 import { ComplaintStatusBadge } from "@/components/complaint-status-badge";
+import { HeroChip, PageHero } from "@/components/page-hero";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getSessionProfile } from "@/lib/auth";
@@ -51,26 +52,37 @@ export default async function ComplaintTrackerPage({ params }: { params: Promise
         </Link>
       </Button>
 
+      <PageHero icon={ClipboardCheck} kicker={t("nav.report")} title={t("tracker.title")}>
+        <HeroChip icon={ClipboardCheck} strong>
+          {t(`tracker.steps.${status}`)}
+        </HeroChip>
+        <HeroChip icon={Truck}>{complaint.service.name}</HeroChip>
+        <HeroChip icon={CalendarDays}>{t("tracker.submittedOn", { date: formatDateTimeFor(lang, complaint.createdAt) })}</HeroChip>
+      </PageHero>
+
       <Card>
-        <CardHeader>
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <CardTitle>{t("tracker.title")}</CardTitle>
-            <ComplaintStatusBadge status={status} label={t(`tracker.steps.${status}`)} />
-          </div>
-          <p className="text-xs text-muted-foreground">
-            {complaint.service.name} · {t("tracker.submittedOn", { date: formatDateTimeFor(lang, complaint.createdAt) })}
-          </p>
+        <CardHeader className="sr-only">
+          <CardTitle>{t("tracker.title")}</CardTitle>
+          <ComplaintStatusBadge status={status} label={t(`tracker.steps.${status}`)} />
         </CardHeader>
-        <CardContent className="space-y-5">
-          <ol className="grid grid-cols-3 gap-2" aria-label={t("tracker.title")}>
+        <CardContent className="space-y-5 pt-5 sm:pt-6">
+          <ol
+            className="relative grid grid-cols-3 gap-2 before:absolute before:left-[16.6%] before:right-[16.6%] before:top-4 before:h-1 before:rounded-full before:bg-muted"
+            aria-label={t("tracker.title")}
+          >
+            <span
+              aria-hidden
+              className="absolute left-[16.6%] top-4 h-1 rounded-full bg-gradient-to-r from-primary to-lime-400 transition-all duration-1000"
+              style={{ width: `${(reached / 2) * 66.8}%` }}
+            />
             {steps.map((step, i) => {
               const done = i <= reached;
               const failed = step === "rejected";
               return (
-                <li key={step} className="flex flex-col items-center gap-1 text-center text-xs">
+                <li key={step} className="relative flex flex-col items-center gap-1.5 text-center text-xs">
                   <span
                     className={cn(
-                      "flex size-8 items-center justify-center rounded-full border-2",
+                      "flex size-9 items-center justify-center rounded-full border-2 shadow-sm",
                       done ? (failed ? "border-unavailable bg-unavailable text-white" : "border-primary bg-primary text-primary-foreground") : "border-muted bg-muted text-muted-foreground",
                     )}
                   >
